@@ -1,0 +1,119 @@
+The below information can be found in Javalin's documentation: https://javalin.io/documentation#exception-mapping
+
+Exception Mapping
+All handlers (before, endpoint, after) can throw Exception (and any subclass of Exception) The 
+ app.exception() method gives you a way of handling these exceptions:
+
+app.exception(NullPointerException.class, (e, ctx) -> {
+    // handle nullpointers here
+});
+
+app.exception(Exception.class, (e, ctx) -> {
+    // handle general exceptions here
+    // will not trigger if more specific exception-mapper found
+});
+Error Mapping
+Error mapping is similar to exception mapping, but it operates on HTTP status codes instead of Exceptions:
+
+app.error(404, ctx -> {
+    ctx.result("Generic 404 message")
+});
+Exception and Error Mapping
+Sometimes we want to use Exception and Error Mapping together:
+
+app.exception(FileNotFoundException.class, (e, ctx) -> {
+    ctx.status(404);
+}).error(404, ctx -> {
+    ctx.result("Generic 404 message")
+});
+
+Java exception handling is important because it helps maintain the normal, desired flow of the 
+program even when unexpected events occur. If Java exceptions are not handled, programs may crash
+or requests may fail. This can be very frustrating for customers and if it happens repeatedly, 
+you could lose those customers.
+
+The worst situation is if your application crashes while the user is doing any important work, 
+especially if their data is lost. To make the user interface robust, it is important to handle
+Java exceptions to prevent the application from unexpectedly crashing and losing data. There can
+be many causes for a sudden crash of the system, such as incorrect or unexpected data input.
+For example, if we try to add two users with duplicate IDs to the database, we should throw an 
+exception since the action would affect database integrity.
+
+Developers can predict many of the Java exceptions that a piece of code is capable of throwing.
+
+The best course of action is to explicitly handle those exceptions to recover from them
+gracefully. Programming languages provide ways to handle exceptions starting from specific ones
+and moving toward the more generic ones. Tracking exceptions centrally offers visibility to your
+development team on the quality of the code and what causes these errors so they can fix them
+faster.
+
+In this example, we will demonstrate how to use error and exception handlers within a note-saving application. For simplicity, we will only include code that is necessary for explaining our topic.
+
+Note.java and NoteController.java
+We will need a Note.java class to describe the domain entity:
+
+
+public class Note {
+
+    // fields
+    private long id;
+    private String content;
+    private String priority;
+
+    // ... other class members, like constructors and getters/setters
+}
+And we have a NoteController.java class that includes endpoint and handler setup:
+
+public class NoteController {
+
+    // ... service layer dependency configuration code omitted
+    
+    // method that starts Javalin and sets up endpoints
+    public void setup() {
+        // create Javalin object
+        Javalin app = Javalin.create().start(8080);
+
+        // endpoints
+        app.get("/notes", this::getAllNotesHandler);
+        app.get("/notes/{id}", this::getNoteByIdHandler);
+
+        app.error(404, this::NotFoundHandler);
+        app.exception(Exception.class, this::genericExceptionHandler);
+    }
+
+     // handlers
+    private void getAllNotesHandler(Context ctx) {
+        // ... statements omitted
+    }
+
+    private void getNoteByIdHandler(Context ctx) {
+        // ... statements omitted
+    }
+
+    private void NotFoundHandler(Context ctx) {
+        ctx.result("Resource not found.");
+    }
+
+    private void genericExceptionHandler(Exception e, Context ctx) {
+        ctx.result("Oops, something went wrong: " + e.getClass() + "\n" + e.getMessage());
+    }
+
+}
+As you can see, we have two endpoints, one for a GET request to /notes and another for a GET 
+request to /notes/{id}. We also include error and exception mapping using app.error() and 
+app.exception(). We can see that the syntax for these methods is very similar to defining an 
+endpoint.
+
+Error Mapping
+The app.error() call requires that we specify a status code to map to and a handler whose action
+will be performed. In our example, we added an app.error() call to handle any client requests
+that would return an 404 status code, meaning the client attempted to access a resource that we
+did not define in our application. The associated handler simply specifies that the response 
+should return the text Resource not found.
+
+Exception Mapping
+The app.exception() call requires that we specify an exception class and a handler whose action
+will be performed. If any handler throws the specified exception, then this mapping's handler 
+will run. In our example, if any generic Exception is thrown, then the response should return
+the text Oops, something went wrong: along with information about the Exception itself, like its 
+class and message.
