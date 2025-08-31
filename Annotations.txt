@@ -1,0 +1,67 @@
+Spring Data annotations are used to configure and customize various aspects of data access in Spring applications. These annotations are part of the Spring Data project, which provides a simplified and unified programming model for interacting with different types of data stores. Here are some commonly used Spring Data annotations and their purposes:
+
+@Entity: This annotation is used to mark a Java class as an entity, which represents a table in a relational database. It is typically used in conjunction with JPA (Java Persistence API) to map Java objects to database tables.
+@Repository: This annotation is used to indicate that a class is a repository, which is responsible for performing CRUD (Create, Read, Update, Delete) operations on entities. Spring Data repositories are interfaces that extend Repository or its subinterfaces and are automatically implemented by Spring at runtime.
+@Query: This annotation is used to define custom query methods in Spring Data repositories. It allows developers to write JPQL (Java Persistence Query Language) or native SQL queries directly within repository interfaces, using method names as placeholders for query parameters.
+@Param: This annotation is used to specify named parameters in @Query annotations. It allows developers to reference method parameters by name in query methods, making the queries more readable and maintainable.
+@Transactional: This annotation is used to mark a method, class, or interface as transactional, indicating that the method should be executed within a transactional context. It is typically used in service layer classes to demarcate transactional boundaries around business logic.
+
+
+Knowing Spring Data annotations is important for several reasons:
+
+Data Access Configuration: Spring Data annotations allow developers to configure and customize various aspects of data access in Spring applications. By understanding these annotations, developers can effectively configure repositories, define custom queries, map entities to database tables, and specify transactional behavior.
+Consistency: Spring Data annotations promote consistency in data access across different parts of an application and among team members. By adhering to a common set of annotations and best practices, developers can maintain a consistent and cohesive codebase, making it easier to understand, debug, and maintain.
+Flexibility: Spring Data annotations provide a flexible and extensible framework for data access configuration. Developers can customize repositories, define custom queries, map entities to database tables, and specify transactional behavior according to their application's requirements, providing flexibility and adaptability to changing business needs.
+Testability: Spring Data annotations facilitate unit testing and integration testing of data access code. By understanding these annotations, developers can write comprehensive tests to validate repository methods, custom queries, and persistence logic, ensuring the reliability and robustness of their applications.
+
+
+Spring Data Annotations
+Spring Data provides an abstraction over data storage technologies. Hence the business logic code is independent. Below are some examples of Spring Data annotations.
+
+@Id
+@Id marks a field in a model or an entity class as the primary key. Since it’s implementation-independent, it makes an entity class easy to use with multiple data stores.
+
+class Associate{
+
+    @Id
+    private Long id;
+    private String name;
+
+      // Getters and Setters 
+    
+}
+@Param
+A parameter annotated with @Param must have a value string matching the corresponding query parameter name.
+
+@Repository
+public interface AssociateRepository extends CrudRepository<Student, Serializable> {
+
+    @Query("select a from Associate a where a.name = :name")
+    List<Associate> findByName(@Param("name") String name);
+@Transactional
+Transactional is to configure the transactional behavior of a method, we can do it with @Transactional annotation.
+
+@Transactional
+    public List<Associate> saveAllAssociates(List<Associates> associateList) {
+        List<Associate> response = (List<Associate>) associateRepository.saveAll(associateList);
+        return response;
+    }
+
+Spring Data JPA Annotations
+Below are some example of Spring Data JPA annotations.
+
+@Query
+Using @Query, we can provide a JPQL implementation for a repository method
+
+@Query("SELECT COUNT(*) FROM Person p")
+long getPersonCount();
+We can also use named parameters:
+
+@Query("FROM Person p WHERE p.name = :name")
+Person findByName(@Param("name") String name);
+We can also use native SQL queries if we set the native query argument to true.
+
+@Query(value = "SELECT AVG(p.age) FROM person p", nativeQuery = true)
+int getAverageAge();
+
+

@@ -1,0 +1,320 @@
+The bean life cycle is as follows:
+
+Spring IOC starts
+Bean Instantiated
+Dependencies Injected
+Internal Spring processing
+Custom init method( ready for use)
+Container shutdown
+Custom destroy method
+Bean Life Cycle
+
+Custom Init method
+In any Spring application for most of the classes some methods should be implemented before the main execution.
+Method calls for these methods are grouped in an init method.
+With the help of Spring, the init method can be invoked after bean instantiation.
+Custom destroy method
+After execution of the init method and bean, before the shutdown of the container, the custom destroy method is invoked.
+Similar to the init method, the destroy methods of all the classes are grouped under a common method.
+With the help of Spring, destroy method can be invoked along with container shutdown.
+Configuration
+The configuration for custom init and custom destroy methods is done in three methods:
+
+XML-based configuration
+Annotation configuration
+Interface configuration
+Note: Interface based configuration is not commonly used and added to the content to provide wide explanation.
+
+
+
+
+An object for a class that is initialized, managed and destroyed by a Spring IoC container is called a bean.
+Consider a DAO class with a JDBC connection. In the bean lifecycle, the first process is bean initialization.
+The second step in the process is passing dependencies like driver name, user name and password etc.
+The third step is the custom init method. Creating the connection is a common and repeated step in JDBC, this can be added to the init method.
+The next step is bean execution. Operations like fetching data and manipulating data from databases come under this step.
+The next step is container shutdown. Before the container shuts down custom destroy method is invoked. Closing database connection can be added to the destroy method.
+Finally, the container is shut down.
+
+
+In this example, we will be working with a Student entity and database. We have a StudentDAO class that allows the application to connect to and work with a database. We also have an XML file for configuring our beans.
+
+Setting Up Our Files
+Student:
+
+public class Student {
+    private int id;
+    private String firstName;
+    private String lastName;
+    private String major;
+
+    // ... other code omitted
+}
+StudentDAO:
+
+package StudentData;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+public class StudentDAO {
+    static String driver ;
+    static Connection con;
+    static String url;
+    static String userName;
+    static String password;
+
+    static void createConnection() throws ClassNotFoundException, SQLException {
+        Class.forName(driver);
+        con = DriverManager.getConnection(url,userName,password);
+            
+    }
+    static void closeConnection() throws SQLException {
+        con.close();
+        
+    }
+    void getAllRecords() throws SQLException {
+        String sql = "Select * from student;";
+        PreparedStatement st = con.prepareStatement(sql);
+        ResultSet rs = st.executeQuery();
+        while(rs.next()) {
+            System.out.println(rs.getInt(1)+ " "+rs.getString(2)+" "+rs.getString(3)+" "+rs.getString(4));
+        }
+    }
+
+}
+The bean configuration is done for the StudentDAO class in an XML file:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    ">
+    <bean id = "StudentDAO" class="StudentData.StudentDAO"></bean>
+   
+</beans>
+Setting Up Injection
+Fields like Driver name, username, password and url can be considered properties and injected. To do this, setter and getter methods are generated for all the fields. A print statement is added in every setter method for reference.
+
+StudentDAO:
+
+    public static String getDriver() {
+        return driver;
+    }
+    public static void setDriver(String driver) {
+        System.out.println("setting Driver");
+        StudentDAO.driver = driver;
+    }
+    public static String getUrl() {
+        
+        return url;
+    }
+    public static void setUrl(String url) {
+        System.out.println("setting url");
+        StudentDAO.url = url;
+    }
+    public static String getUserName() {
+        return userName;
+    }
+    public static void setUserName(String userName) {
+        System.out.println("setting userName");
+        StudentDAO.userName = userName;
+    }
+    public static String getPassword() {
+        return password;
+    }
+    public static void setPassword(String password) {
+        System.out.println("setting password");
+        StudentDAO.password = password;
+    }
+In the XML, the property tag is added in the bean tag with name and value attributes.
+
+<bean id = "StudentDAO" class="StudentData.StudentDAO">
+    <property name="driver" value="com.mysql.cj.jdbc.Driver"></property>
+    <property name="userName" value="root"></property>
+    <property name="password" value="12345"></property>
+    <property name="url" value="jdbc:mysql://localhost:3306/content"></property>
+</bean>
+Using init() and destroy()
+The process of creating a connection is common for every method. If new methods like getRecord and deleteRecord are created, the created connection is repeated. To avoid this, a new method is created for connection. The init method is created and the method call for the connection method is written within in. A print statement is added in the init and destroy method for reference.
+
+void init() throws ClassNotFoundException, SQLException {
+        System.out.println("Inside init method");       
+        createConnection();
+    }
+The process of closing the connection can be done in destroy method by invoking the closeConnection method.
+
+void destroy() throws SQLException {
+        System.out.println("Inside Destroy Method");
+        closeConnection();
+    }
+Using Annotation Configuration
+Configuring the init method
+@PostConstruct is used to configure the init method. Before using annotations, <context:annotation-config> or <bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor" /> should be added to the XML file.
+
+StudentDAO:
+
+@PostConstruct
+    void init() throws ClassNotFoundException, SQLException {
+        System.out.println("Inside init method");       
+        createConnection();
+    }
+Configuring the destroy method
+@PreDestroy is used to configure destroy method. In a web application the application context is closed implicitly but in a desktop application, the application should be explicitly closed.
+
+StudentDAO:
+
+@PreDestroy
+    void destroy() throws SQLException {
+        System.out.println("Inside Destroy Method");
+        closeConnection();
+    }
+By using the below java code, the application context is closed:
+
+((AbstractApplicationContext) context).close();
+A lifecycle hook registerShutdownHook() can also be used to destroy the bean. This is prefered over context.close() because registerShutdownHook() is called once the main thread ends and closes the container. So irrespective of the line where registerShutdownHook() is called, a new getBean() can be written anywhere in the main method without any exception.
+
+Using the registerShutdownHook:
+
+((AbstractApplicationContext) context).registerShutdownHook();
+XML-based configuration
+For XML-based configuration, rather than using the @PostConstruct and PreDestroy annotations, the init-method and destroy-method attributes are added to the bean tag in the XML file:
+
+<bean id = "StudentDAO" class="StudentData.StudentDAO" init-method="init" destroy-method="destroy">
+If there are multiple classes, the init and destroy method names are standardized to init and destroy and default-init-method and default-destroy-method are added to the beans tag.
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    " default-init-method="init" default-destroy-method="destroy">
+Interface-based configuration
+InitializingBean and DisposableBean interfaces are implemented and afterPropertiesSet() and destroy() methods are overridden . Which are similar to the init and destroy methods.
+
+StudentDAO:
+
+package StudentData;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+
+public class StudentDAO implements InitializingBean, DisposableBean{
+    static String driver ;
+    public static String getDriver() {
+        return driver;
+    }
+    public static void setDriver(String driver) {
+        System.out.println("setting Driver");
+        StudentDAO.driver = driver;
+    }
+    static Connection con;
+    static String url;
+    static String userName;
+    static String password;
+    
+    
+    public static Connection getCon() {
+        return con;
+    }
+    public static void setCon(Connection con) {
+        StudentDAO.con = con;
+    }
+    public static String getUrl() {
+        
+        return url;
+    }
+    public static void setUrl(String url) {
+        System.out.println("setting url");
+        StudentDAO.url = url;
+    }
+    public static String getUserName() {
+        return userName;
+    }
+    public static void setUserName(String userName) {
+        System.out.println("setting userName");
+        StudentDAO.userName = userName;
+    }
+    public static String getPassword() {
+        return password;
+    }
+    public static void setPassword(String password) {
+        System.out.println("setting password");
+        StudentDAO.password = password;
+    }
+    void init() throws ClassNotFoundException, SQLException {
+        System.out.println("Inside init method");       
+        createConnection();
+    }
+    
+    static void createConnection() throws ClassNotFoundException, SQLException {
+        Class.forName(driver);
+        con = DriverManager.getConnection(url,userName,password);
+            
+    }
+    static void closeConnection() throws SQLException {
+        con.close();
+        
+    }
+    void getAllRecords() throws SQLException {
+        String sql = "Select * from student;";
+        PreparedStatement st = con.prepareStatement(sql);
+        ResultSet rs = st.executeQuery();
+        while(rs.next()) {
+            System.out.println(rs.getInt(1)+ " "+rs.getString(2)+" "+rs.getString(3)+" "+rs.getString(4));
+        }
+        
+        
+    }
+    public void afterPropertiesSet() throws Exception {
+         System.out.println("Inside init method");      
+         createConnection();
+        
+    }
+    public void destroy() throws SQLException {
+        System.out.println("Inside Destroy Method");
+        closeConnection();
+    }
+
+}
+The output of the code for all the implementations is as follows
+
+setting Driver
+setting userName
+setting password
+setting url
+Inside init method
+1 Krishna Urlaganti Computer Science
+3 Stephen Hawking Physics
+Inside Destroy Method
+Student table:
+
+student_id	first_name	last_name	major
+1	Krishna	Urlaganti	Computer Science
+3	Stephen	Hawking	Physics
+------------	------------	-----------	------------------

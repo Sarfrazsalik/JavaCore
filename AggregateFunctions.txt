@@ -1,0 +1,36 @@
+Aggregate functions in MySQL provide the output as a single value after performing different
+operations on a set of values.
+
+The 5 most commonly used aggregate functions are given as follows:
+
+Aggregate Function	Descriptions
+count()	Returns the number of rows, including rows with NULL values in a group.
+sum()	Returns the total summed values in a set.
+avg()	Returns the average value of an expression.
+min()	Returns the minimum (lowest) value in a set.
+max()	Returns the maximum (highest) value in a set.
+
+Real world applications include:
+
+Bank Management system: Finding the count of all accounts in a bank.
+Employee management system: finding the average salary of all employees.
+Student report: Finding the minimum and maximum marks scored in a specific course.
+
+Counting the amount of records in a table:
+
+SELECT COUNT(*) FROM EMP;    
+Counting the values of a particular column:
+
+SELECT COUNT(EMP_NAME) FROM EMP;   
+Finding the sum of all values from a specific field:
+
+SELECT SUM(duration) AS "Total duration" FROM EMP;
+Calculating the average of the values from specified columnL
+
+SELECT AVG(salary) FROM EMP;
+Finding the minimum salary:
+
+SELECT MIN(salary) FROM EMP;    
+Finding the maximum salary:
+
+SELECT MAX(salary) FROM EMP; 
