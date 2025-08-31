@@ -1,0 +1,195 @@
+HTTP defines a set of request methods to indicate the desired action to be performed for a given
+resource. Although they can also be nouns, these request methods are sometimes referred to as 
+HTTP verbs.
+
+Having a basic understanding of the different HTTP methods, or verbs, an API supports is an 
+helpful knowledge when exploring and testing APIs.
+
+GET 
+GET requests are the most common and widely used methods in APIs and websites. Simply put, 
+the GET method is used to retrieve data from a server at the specified resource.
+For example, say you have an API with a /users endpoint. Making a GET request to that endpoint
+should return a list of all available users.
+
+Since a GET request is only requesting data and not modifying any resources, it's considered a
+safe and idempotent method.
+
+POST
+In web services, POST requests are used to send data to the API server to create or update a
+resource. The data sent to the server is stored in the request body of the HTTP request.
+
+The simplest example is a contact form on a website. When you fill out the inputs in a form and
+hit Send, that data is put in the response body of the request and sent to the server.
+This may be JSON, XML, or query parameters (there's plenty of other formats, but these are the
+most common).
+
+It's worth noting that a POST request is non-idempotent. It mutates data on the backend server
+(by creating or updating a resource), as opposed to a GET request which does not change any data.
+
+PUT
+Similar to POST, PUT requests are used to send data to the API to update or create a resource. 
+The difference is that PUT requests are idempotent. That is, calling the same PUT request 
+multiple times will always produce the same result. In contrast, calling a POST request
+repeatedly may have side effects when creating the same resource multiple times.
+
+Generally, when a PUT request creates a resource the server will respond with a 201 (Created),
+and if the request modifies existing resource the server will return a 200 (OK) or 204 
+(No Content).
+
+PATCH
+A PATCH request is one of the lesser-known HTTP methods, but I'm including it this high in the 
+list since it is similar to POST and PUT. The difference with PATCH is that you only apply 
+partial modifications to the resource.
+
+The difference between PATCH and PUT, is that a PATCH request is non-idempotent
+(like a POST request).
+
+To expand on partial modification, say your API has a /users/{{userid}} endpoint, and a user
+has a username. With a PATCH request, you may only need to send the updated username in the 
+request body - as opposed to POST and PUT which require the full user entity.
+
+DELETE
+The DELETE method is exactly as it sounds: delete the resource at the specified URL. This method
+is one of the more common in RESTful APIs so it's good to know how it works.
+
+If a new user is created with a POST request to /users, and it can be retrieved with a GET 
+request to /users/{{userid}}, then making a DELETE request to /users/{{userid}} will completely
+remove that user.
+
+HEAD
+The HEAD method is almost identical to GET, except without the response body. 
+In other words, if GET /users returns a list of users, then HEAD /users will make the same 
+request but won't get back the list of users.
+
+HEAD requests are useful for checking what a GET request will return before actually making a
+GET request -- like before downloading a large file or response body. 
+You can learn more about HEAD requests on MDN.
+
+It's worth pointing out that not every endpoint that supports GET will support HEAD - it 
+completely depends on the API you're testing.
+
+OPTIONS
+An OPTIONS request should return data describing what other methods and operations the server
+supports at the given URL.
+
+OPTIONS requests are more loosely defined and used than the others, making them a good candidate
+to test for fatal API errors. If an API isn't expecting an OPTIONS request, it's good to put a
+test case in place that verifies failing behavior.
+
+TRACE
+The purpose of the TRACE request is to echo the received request back to the client, allowing 
+the client to see what changes or additions have been made by intermediate servers. It is used
+primarily for diagnostic purposes and is not commonly used in regular web development.
+
+In this example, let's make different kinds of requests to a fake API, https://reqres.in/. 
+We will use the cURL program, which is already available for Mac OS or Linux.
+
+For Windows users, for your command-line interface, I recommend GitBash which is bundled within
+Git for Windows. If you are just using the command prompt, you would need to install cURL 
+manually. 
+Instructions are here:
+https://developer.zendesk.com/documentation/api-basics/getting-started/installing-and-using-curl/#windows-10-version-1803-or-later
+
+GET Request
+Use the following command in your CLI: curl https://reqres.in/api/users/2
+
+The following should be the output (formatted here for readability):
+
+{
+    "data":
+    {
+        "id":2,
+        "email":"janet.weaver@reqres.in",
+        "first_name":"Janet",
+        "last_name":"Weaver",
+        "avatar":"https://reqres.in/img/faces/2-image.jpg"
+    },
+    "support":
+    {
+        "url":"https://reqres.in/#support-heading",
+        "text":"To keep ReqRes free, contributions towards server costs are appreciated!"
+    }
+}
+What we get back is the response body, or the data sent back by the response. We can learn more about the response by using the -i or --include option, which includes response header information. The following command:
+
+curl -i https://reqres.in/api/users/2
+Returns:
+
+HTTP/1.1 200 OK
+Date: Thu, 18 Apr 2024 14:01:59 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 280
+Connection: keep-alive
+... more output ommitted
+
+{
+    "data":
+    {
+        "id":2,
+        "email":"janet.weaver@reqres.in",
+        "first_name":"Janet",
+        "last_name":"Weaver",
+        "avatar":"https://reqres.in/img/faces/2-image.jpg"
+    },
+    "support":
+    {
+        "url":"https://reqres.in/#support-heading",
+        "text":"To keep ReqRes free, contributions towards server costs are appreciated!"
+    }
+}
+This response returns information about the response itself along with the response body.
+
+POST Request
+Use the following command in your CLI: curl -X POST -d "{\"first_name\": \"Kendra\", \"last_name\": \"Jackson\"}" -H "Content-Type: application/json" https://reqres.in/api/users/2
+
+We include the -X option. This allows us to specify an HTTP verb to use rather than the default GET verb. We chose POST as its argument. We also included the -d option which enables us to send information in the body of the request. The information we sent is {\"first_name\": \"Kendra\", \"last_name\": \"Jackson\"}. We escape the double quotes since we are surrounding the data with double quotes and we want to prevent any confusion. Single quotes may not work depending on your CLI. Lastly, we added the -H option with the argument Content-Type: application/json. This allows us to specify the type of data we are sending in the body. The following should be the output (formatted here for readability):
+
+
+{
+    "first_name":"Kendra",
+    "last_name":"Jackson",
+    "id":"607",
+    "createdAt":"2024-04-18T14:54:41.044Z"
+    }
+We see that a new user was created and given an id of 607. If you are following along, the id may differ for you.
+
+PUT Request
+Use the following command in your CLI: curl -X PUT -d "{\"first_name\": \"Kendra\", \"last_name\": \"Jackson\"}" -H "Content-Type: application/json" https://reqres.in/api/users/2
+
+The following should be the output (formatted here for readability):
+
+{
+    "first_name":"Kendra",
+    "last_name":"Jackson",
+    "updatedAt":"2024-04-18T14:50:00.789Z"
+}
+We receive back the information as confirmation it was updated successfully. Note that we're updating the information for a specific resource, rather than with POST where we add information to a collection of resources. When we use a PUT request, we replace all information at that resource with what we send.
+
+DELETE Request
+Use the following command in your CLI: curl -i -X DELETE https://reqres.in/api/users/2
+
+We are using the -i flag because the API chose not to send any information in the response body for a DELETE request. The following should be the output:
+
+HTTP/1.1 204 No Content
+Date: Thu, 18 Apr 2024 14:31:19 GMT
+Content-Length: 0
+Connection: keep-alive
+... more output ommitted
+We see a success status code of 204.
+
+
+HTTP Status Codes
+HTTP Status Codes indicate whether a specific HTTP request has been successfully completed.
+
+Responses are grouped in five classes:
+
+Informational responses (100–199)
+Successful responses (200–299)
+Redirection messages (300–399)
+Client error responses (400–499)
+Server error responses (500–599)
+The term "HTTP status code" is actually the common term for the HTTP status line that includes
+both the HTTP status code and the HTTP reason phrase.
+
+For example, the HTTP status line 500: Internal Server Error is made up of the HTTP status code
+of 500 and the HTTP reason phrase of Internal Server Error.

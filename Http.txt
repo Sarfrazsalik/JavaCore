@@ -1,0 +1,99 @@
+HTTP stands for HyperText Transfer Protocol.
+A technique of transmitting data in a particular format, primarily between a server and a browser.
+It uses an architecture in which a client makes a connection to a server, makes a request, and
+waits for the response.
+
+The data in the "particular format" mentioned is the hypertext stated in the name, with
+hypertext simply referring to text documents that have the special ability to link to one another.
+There are many kinds of hypertext documents, and ones that have the ability to show multiple
+kinds of media are called hypermedia documents. HTTP is capable of transmitting hypermedia 
+documents in addition to hypertext documents.
+
+A server is a computer or collection of computers that is the destination of the HTTP call.
+Commonly, this will be a powerful collection of computers that have an increased level of 
+computation power and data storage compared to the client.
+
+A client is a computer or collection of computers that is the creator of the HTTP call. 
+Commonly, this will be a single, personal computer.
+
+Note that while server and client typically refer to what was mentioned, that is not what they 
+always are. For example, you can have a client with vastly more computational power than the
+server, and you can have clients that are normally servers themselves.
+
+HTTP is a protocol that is referred to as stateless, which means that once a request and response
+has completed, the server doesn't retain any data about the request. 
+Just because HTTP is stateless does NOT mean that HTTP methods cannot change data on the server, 
+or that the server will not track HTTP calls made to it. Let's break this down in more detail:
+
+A client makes a request to the server to calculate 5 + 5
+The server takes in the data provided (5 and 5) in order to calculate
+The server makes the calculation and responds with 10
+The server stores in a database the user that made the request and a timestamp of when they 
+made the call
+The same client makes a request to the server, again to calculate 5 + 5
+Because HTTP is stateless, the server does not still have 5 and 5 stored and must take them in
+again
+The server makes the calculation and responds with 10
+The server stores in a database the same information as before
+
+How does HTTP Work?
+HTTP is broken down into a number of methods that define the behavior that the server should take
+when it receives the HTTP request. We'll go into more detail about the HTTP methods in a later
+topic. Even though each method will cause the server to respond in a different way, the general
+way they are structured is the same.
+
+HTTP has two parts: the request and the response. 
+The client creates the request, and the server creates the response.
+
+The request will hold the following information:
+
+The method being used
+A URL where the target is
+What version of HTTP is being used
+Optional information to help the server with the request (called headers)
+For some methods, a body which contains some resource
+
+Ex: Danni wants to upload a document to a server over the internet, so the body in this case
+would be the document that Danni is trying to upload.
+
+The response will hold the following information:
+
+What version of HTTP is being used
+A status code reflecting the outcome of the request
+A status message which is shorthand and less descriptive than the status code
+Optional information to detail what happened with the request (called headers again)
+For some methods, a body which contains some resource
+
+Ex: This time, Danni wants to download a document from a server. In order to get that document, 
+the browser receives it over HTTP. The body of that response is the document Danni is trying to
+download.
+
+In this context, a resource is simply data. It could be a value, it could be a photo, it could 
+be a text document, or it can commonly be a JSON. Of course, a resource isn't limited to these
+things, anything that is data is fair game to be a resource.
+
+
+Why HTTP?
+An example of another protocol would be SOAP, which stands for Simple Object Access Protocol.
+Now that we have established that there are other choices to make when it comes to the protocol
+we want to use to transmit data across the internet, why choose HTTP?
+
+As mentioned earlier, HTTP is the most common. That in itself is a strong reason to use it, since
+everyone else is using it they have already made servers that respond to HTTP requests instead 
+of say SOAP requests. Of course this begs the question as to why HTTP is the most common.
+
+HTTP is very easy to use. Most programming languages have an API (Application Programming 
+Interface) that allow us to very easily make HTTP requests and parse through the results.
+All we need to do is build out the request with a method, endpoint, headers and a body and the 
+API handles the rest, in comparison to something like SOAP where there are a lot more steps that
+we would have to do on the programming side in order to make even a simple request, with more
+complicated requests being quite cumbersome to create.
+
+HTTP has the ability to transmit just about any kind of data over the internet, which is another
+strong reason for its use. In particular, it is able to transmit the extremely popular JSON data
+format.
+
+REST stands for REpresentational State Transfer. At this point, we can ignore this part and just
+stick with the fact that a RESTful webservice uses HTTP in order to transmit data. There are a
+large number of these services out there, but the one we will use for our example is the PokeAPI,
+which contains information about the critters from the popular Pokemon franchise.

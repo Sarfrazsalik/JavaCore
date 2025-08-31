@@ -1,0 +1,151 @@
+Dependency Injection
+Injecting objects into other objects is called Dependency Injection.
+
+IOC
+In a Spring Application, the process of adding dependencies and calling the objects of classes is done in the Spring container, which was traditionally done by the programmer explicitly.
+
+The transfer of control of objects or portions of a program to a container or a framework is called Inversion of Control.
+
+Advantages of IoC
+Decoupling the task execution from the implementation.
+Easy switching between different Implementation
+Greater modularity of a program
+Easy testing of a program by isolating the component or mocking its dependencies.
+The IoC container
+IoC container is a core container that uses Dependency Injection or IoC pattern to implicitly provide an object reference in a class during runtime.
+
+org.springframework.beans.factory.BeanFactory is the actual Spring IoC container.
+
+The BeanFactory interface is responsible to instantiate, configure objects and assemble the dependencies between these objects.
+
+Spring IoC Container
+
+Bean Factory vs Application Context
+The org.springframework.beans and org.springframework.context packages are the basis for the Spring framework's IoC container.
+
+The ApplicationContext is built on top of BeanFactory.
+
+The BeanFactory provides the configuration framework and the basic functionality, while ApplicationContext adds additional functionality like easy integration with Spring AOP features, message resource handling, event propagation, and contexts specific to the application-layer like WebApplicationContext for use in web applications.
+
+Bean
+The object that is instantiated, assembled and managed by the IoC container is called a bean. Beans form the backbone of any Spring application.
+
+Initializing a container
+The Spring IoC container can be initialized either by the BeanFactory or ApplicationContext.
+
+BeanFactory:
+
+Resource resource = new FileSystemResource("beans.xml");
+BeanFactory factory = new XmlBeanFactory(resource);
+ApplicationContext:
+
+ApplicationContext context = new ClassPathXmlApplicationContext(
+new String[] {"applicationContext.xml", "applicationContext-part2.xml"});
+
+
+
+
+Spring IoC container is used to initialize, assemble, and manage beans.
+Consider classes named car and bike which implement the vehicle interface, the objects for these classes are initialized, assembled and managed as spring beans.
+These objects can be injected as dependencies for the other classes.
+If the HP laptop is a class, the hard drive is an interface. The classes like SanDisk and Toshiba implement the Hard drive interface. SanDisk and Toshiba are dependencies for the HP laptop.
+
+
+Spring XML configuration
+
+The following boilerplate code is added in the spring.xml file.
+The following code can be acquired directly from the spring website.
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    " >
+    <!-- bean definitions here -->
+</beans>
+Dependency Injection and Bean definition
+
+Consider an interface named Vehicle with an abstract method drive() and two classes named Car and Bike that implement the interface Vehicle.
+The class App has the main method that created an ApplicationContext object and used dependency injection.
+As both car and bike are vehicles any of them can be used as a dependency.
+Spring.xml:
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    ">
+    <bean id="vehicle" class = "Revature.Bike"></bean>
+</beans>
+App.java:
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class App {
+    public static void main(String[] args) {
+        
+        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+        Vehicle obj = (Vehicle)context.getBean("vehicle");
+        obj.drive();
+        
+    }
+
+}
+Car.java:
+
+package Revature;
+
+public class Car implements Vehicle{
+
+    public void drive() {
+        System.out.println("I am riding a car");
+        
+    }
+    public static void main(String[] args) {
+        System.out.println("Hello World");
+    }
+
+}
+Bike.java:
+
+package Revature;
+
+public class Bike implements Vehicle{
+
+    public void drive() {
+        System.out.println("I am riding a bike");
+        
+    }
+
+}
+Vehicle.java:
+
+package Revature;
+
+public interface Vehicle {
+    void drive();
+
+}
+The output is:
+
+I am riding a bike
+if the bean definition is changed as follows:
+   <bean id="vehicle" class = "Revature.Car"></bean>
+The output is
+
+I am riding a car
+
+
+

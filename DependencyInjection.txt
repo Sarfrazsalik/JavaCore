@@ -1,0 +1,194 @@
+package com.revature.components;
+
+import org.springframework.stereotype.Component;
+
+/**
+ * For the purpose of this application, the multiplier class is dependent on the functionality of the Adder class,
+ * making the Multiplier class dependant on the Adder class.
+ * 
+ *
+ * This class is a potential bean that can be wired into another component
+ * via dependency injection. A Bean is an object that is instantiated by Spring, rather than by the developer.
+ * Dependency injection is the process of Spring inserting the instantiated Bean into another class.
+ * "wiring" them together. This allows us to achieve loose coupling - we can switch which implementation of a class
+ * we're currently using, or modify the existing classes we're using, while making less changes to the classes that
+ * depend on this class.
+ *
+ * There is no need to change anything within this class.
+ */
+@Component
+public class Adder {
+    /**
+     * Return the sum of two numbers.
+     * @param a number 1
+     * @param b number 2
+     * @return a + b
+     */
+    public double add(double a, double b){
+        return a + b;
+    }
+}
+
+
+package com.revature.components;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ ** For the purpose of this application, the Multiplier class is dependent on the functionality of the Adder class,
+ * making this a dependency of Adder.
+ 
+ * This class is a potential bean that can be wired into another component
+ * via dependency injection. A Bean is an object that is instantiated by Spring, rather than by the developer.
+ * Dependency injection is the process of Spring inserting the instantiated Bean into another class.
+ * "wiring" them together. This allows us to achieve loose coupling - we can switch which implementation of a class
+ * we're currently using, or modify the existing classes we're using, while making less changes to the classes that
+ * depend on this class.
+ */
+@Component
+public class Multiplier {
+    /**
+     * TODO: Add an annotation over this Adder field to achieve field injection:
+     *
+     * Generally, field injection is not recommended, but it works for this example.
+     * @param adder
+     */
+    Adder adder;
+    @Autowired
+    public Multiplier(Adder adder){
+        this.adder = adder;
+    }
+
+    /**
+     * Instead of using the * operator normally, leverage the Adder dependency to multiply numbers the hard way
+     * @param a number 1
+     * @param b number 2
+     * @return a * b
+     */
+    public double multiply(double a, double b){
+        double result = 0;
+        for(int i = 0; i < Math.abs(b); i++){
+            result = adder.add(result,a);
+        }
+        // Handle edge case of negative b
+        if(b < 0) result *= -1;
+        return result;
+    }
+}
+
+
+package com.revature.components;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ *  For the purpose of this application, the Squarer class is dependent on the functionality of the Multiplier class,
+ * making this a dependency of Multiplier.
+ *
+ * The current functionality of the Application requires the "Squarer" class to be retrieved from the Application
+ * Context - which you can think of as the current pool of usable Spring Beans.
+ */
+@Component
+public class Squarer {
+    /**
+     * TODO: Inject this field
+     */
+    Multiplier multiplier;
+    @Autowired
+    public Squarer(Multiplier multiplier){
+        this.multiplier = multiplier;
+    }
+ 
+    /**
+     * Leverage the Multiplier dependency to multiply a value with itself.
+     * This will only work if Multiplier was successfully autowired into this class.
+     * @param value some number
+     * @return value^2
+     */
+    public double getSquare(double value){
+        return multiplier.multiply(value, value);
+    }
+}
+
+
+package com.revature;
+
+import com.revature.components.Adder;
+import com.revature.components.Multiplier;
+import com.revature.components.Squarer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.stereotype.Component;
+
+/**
+ * To show off how dependency injection works, this class
+ * uses the Adder, Multiplier, and Squarer classes to
+ * perform mathematical operations and return the results
+ * as strings.
+ *
+ * The @Autowired annotation will inform Spring to automatically find the most appropriate bean to wire into this
+ * class (based on the name & type of the Object used.) The @Autowired annotation can be used in 3 different ways:
+ * constructor injection (above a constructor), setter injection (over a setter method), and field injection
+ * (above the injected field declaration itself, as is done here).
+ *
+ * TODO: Add the @Autowired annotation to achieve dependency injection in 3 different ways (constructor, setter, and field)
+ */
+@ComponentScan(basePackages = "com.revature.components")
+@Component
+public class ArithmeticPresentationLayer {
+    
+    @Autowired
+    private Adder adder;
+    private Multiplier multiplier;
+    private Squarer squarer;
+
+    @Autowired
+    public void setMultiplier(Multiplier multiplier) {
+        this.multiplier = multiplier;
+    }
+    
+    @Autowired
+    public ArithmeticPresentationLayer(Squarer squarer) {
+        this.squarer = squarer;
+    }
+
+    public static void main(String[] args) {
+        // Use this main method for manual testing (optional)
+        // Create the Spring container
+        ApplicationContext context =  new AnnotationConfigApplicationContext(ArithmeticPresentationLayer.class);
+
+        // Retrieve the RoryApplication bean from the container
+        ArithmeticPresentationLayer app = context.getBean(ArithmeticPresentationLayer.class);
+    }
+
+    /**
+     * @param a - number 1
+     * @param b - number 2
+     * @return the addition operation as a String, see tests for specific formatting
+     */
+    public String addConvertToString(double a, double b){
+        return String.format("The result of %.1f + %.1f is %.1f", a, b, adder.add(a,b));
+    }
+    /**
+     * @param a - number 1
+     * @param b - number 2
+     * @return the multiplication operation as a String, see tests for specific formatting
+     */
+    public String multiplyConvertToString(double a, double b){
+        return String.format("The result of %.1f * %.1f is %.1f", a, b, multiplier.multiply(a,b));
+    }
+
+    /**
+     * @param a - number 1
+     * @return the square operation as a String, see tests for specific formatting
+     */
+    public String squareConvertToString(double a){
+        return String.format("The result of %.1f squared is %.1f", a, squarer.getSquare(a));
+    }
+
+}

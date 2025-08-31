@@ -1,0 +1,329 @@
+Mockito is a popular open source framework for mocking objects (mock objects) and methods 
+(method stubs) in software tests.
+Using Mockito greatly simplifies the development of tests for classes with external dependencies.
+
+A mock object is a dummy implementation for an interface or a class.
+It allows to define the output of certain method calls. They typically record the interaction
+with the system and so that you can perform behavior testing. 
+
+Behavior testing is where you verify the interactions between the objects in your code rather
+than just the output or state changes of those objects.
+
+There are also spies, which are partial mocks and by default have the actual implementation of the
+methods rather than dummy implementations.
+
+Recent versions of Mockito can also mock static methods and final classes. 
+Also, private methods are not visible for tests, so they can not be mocked.
+
+During testing, a stub is a piece of code that takes place of another component.
+
+Mocks and Stubs are Java classes and methods that are used in place of external dependencies. 
+These classes are created before running tests to allow a developer to dictate expected behaviors
+from integrations, and focus on local methods, typically for unit tests.
+
+More specifically:
+
+A stub is an entity that has its return values pre-programmed.
+It is injected into the test class so that you have complete control over the input being tested.
+
+A mock is a class whose interactions with the test class can be evaluated after the test is over.
+For example, you can ask it whether one of its methods was called or how many times it was called.
+
+Classes with unintended consequences that must be investigated, like those that send emails or
+communicate data to another external service, are common candidates for mocks.
+
+a spy is a class that uses the real implementation of methods unless we choose to stub them. This
+is different from mocks in that, if we choose to not stub a mock's method, it will still not have
+an implementation and the return value is a default fake value, like 0 or null.
+
+
+Mockito is a mocking framework that tastes really good. It lets you write beautiful tests with a
+clean & simple API. Mockito doesn’t give you hangover because the tests are very readable and 
+they produce clean verification errors.
+
+Massive StackOverflow community voted Mockito the best mocking framework for java. Even though 
+StackOverflow shuns questions that likely raise emotional debates the fact is Mockito has the 
+most votes.
+
+Top 10 Java library across all libraries, not only the testing tools. In late 2013 there was an
+analysis made of 30.000 GitHub projects. Although Mockito reached number 9 in the main report,
+mockito-core and mockito-all are the same tool and therefore the factual position of Mockito is
+number 4, surpassing famous tools like Guava or Spring. Treat this study as an indicator of a big
+impact that Mockito makes every day on unit tests written in Java.
+
+Dan North, the originator of Behavior-Driven Development wrote this back in 2008:
+
+“We decided during the main conference that we should use JUnit 4 and Mockito because we think
+they are the future of TDD and mocking in Java”
+Given the current popularity of Mockito, Dan was spot on with his prediction.
+
+Use your own judgement in choosing a testing framework. The Mockito team always respects your
+choice. Keep writing great tests every day!
+
+
+
+Adding Mockito to a project
+Using the Mockito libraries should be done with a modern dependency system like Maven or Gradle. 
+All modern IDEs (Eclipse, Visual Studio Code, IntelliJ) support both Maven and Gradle.
+
+The following contains detailed descriptions for your environment, pick the one which is relevant
+for you. The latest version of Mockito can be found via
+ https://search.maven.org/artifact/org.mockito/mockito-core.
+
+The Pet.java Class
+Below is a class we will be using in this example, Pet.java:
+
+public class Pet {
+    
+    private int id;
+    private String name;
+    private int age;
+    private String species;
+    private int vetId;
+
+    // ... constructors, getters/setters omitted
+
+    public String talk() {
+        return "animal noise";
+    }
+
+    public String bow() {
+        return "the pet bows";
+    }
+    
+    public void doTrick() {
+        talk();
+        bow();
+        talk();
+    }
+}
+Please note imports and other code is excluded from these examples for simplicity.
+
+Creating Mocks
+Using the mock() method:
+
+public class PetTest {
+    
+    Pet petMock = mock(Pet.class);
+
+    // ... tests omitted
+}
+Using the @Mock annotation and the openMocks() method:
+
+public class PetTest {
+    
+    @Mock
+    Pet petMock;
+
+    @BeforeEach
+    public void setUpTests() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    // ... tests omitted
+}
+Using the @Mock annotation and the @ExtendWith() annotation:
+
+@ExtendWith(MockitoExtension.class)  
+public class PetTest {
+    
+    @Mock
+    Pet petMock;
+
+    // ... tests omitted
+}
+Please note that the @ExtendWith() annotation is included in a separate dependency: 
+https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter
+
+Using Stubs
+Stubbed methods return dummy values by default. Now that we've mocked a pet object, when we 
+the returned value of its stubbed method, talk(), we can assert that the value is null.
+
+Checking that the stubbed method returns null:
+
+ @Test
+public void talk_returnsNull() {
+    String actual = petMock.talk();
+    String expected = null;
+
+    assertEquals(expected, actual); // test passes
+}
+To change the behavior of a stubbed method, you can use the when() method. It takes in the method
+whose behavior you want to modify as an argument. You can then chain an OngoingStubbing call to
+do the modification. Here's an example of using the thenReturn() method:
+
+    @Test
+    public void bow_returnsSomethingDifferent() {
+        when(petMock.bow()).thenReturn("this other String!");
+    }
+Sometimes in testing you would want to test behavior if an exeption is thrown. To throw
+exceptions in your tests, you can use thenThrow():
+
+    @Test
+    public void bow_throwExceptionJustBecause() {
+        when(petMock.bow()).thenThrow(Exception.class);
+    }
+Stubbing void methods requires the use of a different syntax because the when() method does not 
+like void methods, but the results are the same.
+
+@Test
+public void doTrick_throwsExceptionJustBecause() {
+    // when(petMock.doTrick()).thenThrow(Exception.class); // compiler error!
+    doThrow(Exception.class).when(petMock).doTrick(); // this works!
+}
+You can find more information about this family of methods in the documentation: 
+https://javadoc.io/doc/org.mockito/mockito-core/1.10.19/org/mockito/Mockito.html#do_family_methods_stubs
+
+For more flexibility with stubbing, you can look into argument matchers:
+https://javadoc.io/static/org.mockito/mockito-core/1.10.19/org/mockito/Matchers.html
+
+Creating Spies
+You would create a spy just as you would your mock, with any of the three methods mentioned.
+The only difference is you are replacing the word Mock or mock with Spy or spy in your syntax. 
+An example for creating a spy:
+
+public class PetTest {
+    
+    Pet petSpy = spy(Pet.class);
+
+    // ... other code omitted
+}
+Behavior Testing
+Checking that the spy's not stubbed doTrick() method does call talk() at least once:
+
+@Test
+    public void doTrick_callsTalkAtLeastOnce() {
+        petSpy.doTrick();
+
+        verify(petSpy, atLeastOnce()).talk(); // test passes
+    }
+You can use the Mocikto class's verify() method to test the interactions between objects and their
+method calls. The first argument is the object to test, the second is the Verification Mode and
+then you specify the method you want to verify.
+
+You can also verify the order of the calls or that an interaction never happened.
+
+Dependency Injection
+Mockito provides an annotation for injecting mock objects into dependent objects. Let's add to 
+our example code to demonstrate this annotation. We will now have a PetService interface and an 
+implemention class, PetServiceImpl. This layer of our application depends on a DAO layer. We can 
+see the dependency in the PetServiceImpl class. Our goal in this section is to test the service 
+layer, not the DAO layer.
+
+public interface PetService {
+
+    public Pet getPetById(int id);
+
+    public List<Pet> getAllPetsByVetId(int id);
+    
+    // ... other methods omitted
+}
+
+public class PetServiceImpl implements PetService {
+
+    // dependency
+    PetDAO petDAO;
+
+    public PetServiceImpl(PetDAO petDAO) {
+        this.petDAO = petDAO;
+    }
+
+    @Override
+    public Pet getPetById(int id) {
+            return petDAO.getPetById(id);
+    }
+
+    @Override
+    public List<Pet> getAllPetsByVetId(int id) {
+        List<Pet> allPetsReturned = petDAO.getAllPets();
+		List<Pet> allPetsById = new ArrayList<>();
+		
+		for (Pet pet : allPetsReturned) {
+            if (pet.getVetId() == id) {
+                allPetsById.add(pet);
+            }
+        }
+	
+		return allPetsById;
+    }
+
+    // ... other methods omitted
+
+}
+Let's write out test class:
+
+public class PetServiceTest {
+
+    // specify which object to inject into
+    @InjectMocks
+    private PetService petService = new PetServiceImpl(null);
+
+    // specify what to inject
+    @Mock
+    private PetDAO petDAOMock;
+
+    // create a variable that keeps track of mocked objects
+    private AutoCloseable openMocks;
+    
+    @BeforeEach
+    public void setUpTests() {
+        // does actual injecting
+        openMocks = MockitoAnnotations.openMocks(this);
+    }
+
+    // ... tests omitted
+
+    @AfterEach
+    public void tearDownTests() throws Exception {
+        // release mocks
+        openMocks.close();
+    }
+}
+Notice how we use the @InjectMocks annotation to specify which object needs its dependency 
+injected. We then created a mock, and then in the @BeforeEach setup method, we do the actual 
+injecting. Note that the @InjectMocks annotation only works with fields annotated with @Mock or 
+@Spy. MockitoAnnotations.openMocks() returns an instance of AutoCloseable. This allows us to keep
+track of our mocks and release their resources when we are finished with them.
+
+Let's do an example of a service method test:
+
+@Test
+public void getPetById_succeeds() {
+    // arrange: create dummy info for stubbed method to return
+    Pet pet = new Pet(1, "Dobby", 3, "Dog", 1);
+    when(petDAOMock.getPetById(1)).thenReturn(pet);
+
+    // act: use actual implementation of object you are trying to test
+    Pet petReturned = petService.getPetById(1);
+
+    // assert: service layer method should return whatever DAO layer method did
+    assertEquals(pet, petReturned);
+}
+This next example is a little more complex:
+
+@Test
+public void test_getAllPetsByVetId_returned_list_is_of_correct_size() {
+    // arrange
+    List<Pet> testList = new ArrayList<>();
+    Collections.addAll(testList, new Pet(1, "Candy", 1, "Dog", 1),
+                            new Pet(2, "Torchy", 3, "Cat", 2),
+                            new Pet(3, "Egg", 8, "Bird", 3),
+                            new Pet(4, "Whiskers", 3, "Cat", 2),
+                            new Pet(5, "Joe", 10, "Dog", 1));
+    
+    when(petDAOMock.getAllPets()).thenReturn(testList);
+
+    // act
+    List<Pet> listReturned = petService.getAllPetsByVetId(2);
+
+    // assert
+    assertTrue(listReturned.size() == 2);
+}
+This example should also drive home the point that we want to test the service layer, not the DAO
+layer. We control the data we want the DAO layer to return so that the test results not vary. If 
+we chose not to mock the DAO layer, we may get a different set of pets because the database data 
+may change. What we want to test is whether our getAllPetsByVetId method works as intended with 
+whatever information it receives from the DAO layer.
+
+For more information about the @InjectMocks annotation, you can look at the relevant documentation:
+https://javadoc.io/doc/org.mockito/mockito-core/3.6.28/org/mockito/InjectMocks.html

@@ -1,0 +1,47 @@
+Spring MVC includes several convenience annotations for each of the HTTP request types. These annotations are all @RequestMapping annotated with their appropriate method value assigned already and have the same properties as the @RequestMapping annotation. The following request mapping annotations are available to use:
+
+@GetMapping
+@PostMapping
+@PutMapping
+@DeleteMapping
+@PatchMapping
+We can see that the naming conventions handles each of those respective HTTP request methods.
+
+Each controller method can instead now include the convenience annotation for their particular request when called rather than the RequestMapping annotation. Examples are:
+
+@PostMapping for "addProduct",
+@GetMapping for "findAllProducts",
+@DeleteMapping for "removeProduct", etc.
+
+Below is an example of using the HTTP method annotations.
+
+@Controller
+@ResponseBody
+@RequestMapping("/api/users")
+public class UserController {
+
+    @PostMapping("/register")
+    public User register(@RequestBody User newUser) {
+        // Logic to register a new user
+    }
+
+    @PostMapping("/login")
+    public User login(@RequestBody LoginRequest loginRequest) {
+        // Logic to authenticate user login
+    }
+
+    @GetMapping("/{userId}")
+    public User getUserProfile(@PathVariable Long userId) {
+        // Logic to retrieve user profile
+    }
+
+    @PutMapping("/{userId}")
+    public User updateUserProfile(@PathVariable Long userId, @RequestBody User updatedUser) {
+        // Logic to update user profile
+    }
+
+    // Other handler methods for user operations...
+}
+We can see clients can perform requests such as a POST request to /api/users/register or a POST request to /api/users/login using the relevant HTTP method annotations.
+
+

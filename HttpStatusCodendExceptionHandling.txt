@@ -1,0 +1,172 @@
+
+@ResponseStatus is a method level annotation in Spring Boot and is used to declare the HTTP status code to be returned by a handler method in case of a specific exception being thrown. Spring Boot uses the status code specified in the annotation to construct the HTTP response. You can specify any HTTP status code using the value attribute of the @ResponseStatus annotation. The value attribute takes in a value of type HttpStatus. The HttpStatus enum provides the "named" values for all of the status codes, i.e. HttpStatus.CREATED for status code 201, HttpStatus.Accepted for status code 202.
+
+@ExceptionHandler is an annotation on the method level that handles any exceptions specified in the annotation properties. These properties can include a generic catch-all with the Exception.class, a single instance of any exception class, or an array of multiple exception classes.
+
+Example of using both annotations:
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class ExampleController {
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return "Resource not found: " + ex.getMessage();
+    }
+
+    // Other controller methods...
+}
+
+If no @ExceptionHandler or @ResponseStatus annotation is found for an exception, Spring Boot returns a default status code of 500 (INTERNAL_SERVER_ERROR) to indicate that an unexpected error has occurred.
+
+
+The @ExceptionHandler and @ResponseStatus annotations in Spring Framework are essential for handling exceptions and customizing HTTP responses in web applications. Here's why they are important:
+
+Granular Error Handling: With @ExceptionHandler, you can handle different types of exceptions differently. This granularity allows you to provide specific error messages, status codes, and responses based on the nature of the exception. For example, you can return a custom error message and a 404 status code for a ResourceNotFoundException, while returning a generic error message and a 500 status code for other exceptions.
+Custom Responses: The @ExceptionHandler annotation gives you full control over the HTTP response sent back to the client when an exception occurs. You can customize the status code, headers, and body of the response to provide meaningful feedback to the user. This helps in communicating the cause of the error and guiding the user on how to proceed.
+Fine-Grained Control: @ResponseStatus allows you to specify the HTTP status code to be returned for a specific exception. This gives you fine-grained control over the status codes returned by your application, ensuring that they align with the HTTP specification and the requirements of your API clients.
+Cleaner Code: By using @ExceptionHandler and @ResponseStatus, you can keep your controller methods focused on handling business logic, while moving error handling logic to separate methods. This leads to cleaner and more maintainable code, with better separation of concerns.
+
+
+Consider an example application where we have students that can submit, update, or get their information. See the below controller handler methods we are starting with.
+
+Student Controller:
+
+package com.sample.controller;
+
+import com.sample.model.Student;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+@RequestMapping("student")
+public class StudentController {
+
+    private List<Student> studentList = new ArrayList<>();
+
+    {
+        studentList.add(new Student("admin@mail.com", "IT",100,"adminPass"));
+        studentList.add(new Student("Charles@mail.com", "Biology",72,"password"));
+        studentList.add(new Student("Nick@mail.com", "Computer Science",18,"superPass"));
+    }
+
+    @GetMapping("info/{email}")
+    public @ResponseBody ResponseEntity<Student> displayInfo(@PathVariable String email) {
+
+        for (Student student:studentList){
+            if(student.getEmail().equals(email))
+                return ResponseEntity.status(HttpStatus.ACCEPTED)
+                        .body(student);
+        }
+
+    }
+
+    @PostMapping("submit")
+    public @ResponseBody ResponseEntity<String> submitInfo(@RequestParam String email,
+                                          @RequestParam String major,
+                                          @RequestParam int age,
+                                          @RequestParam String password){
+
+        studentList.add(new Student(email, major, age, password));
+        return ResponseEntity.status(201)
+                .body("Successfully Registered");
+
+    }
+
+    @PutMapping("update")
+    public @ResponseBody ResponseEntity<Void> update(@RequestBody Student updatedStudent){
+        if(studentList.removeIf(student -> student.getEmail().equals(updatedStudent.getEmail()))) {
+            studentList.add(updatedStudent);
+            return ResponseEntity.noContent()
+                    .header("update-status", "true")
+                    .build();
+        }
+    }
+
+}
+In our controller handler methods, our responses should be able to reasonably handle any exceptions thrown at them and not simply return a String. As the above code works for successfull calls, the exceptions where we cannot find the student by email we cannot perform our GET or PUT requests to achieve the appropriate response. Along with this we may have issues with our POST requests that are missing required params.
+
+Let's edit the controller's handlers so that we throw exceptions when necessary and create @ExceptionHandler methods to handle these exceptions:
+
+package com.sample.controller;
+
+import com.sample.model.Student;
+import com.sample.exception.CustomException;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+@RequestMapping("student")
+public class StudentController {
+
+    private List<Student> studentList = new ArrayList<>();
+
+    {
+        studentList.add(new Student("admin@mail.com", "IT",100,"adminPass"));
+        studentList.add(new Student("Charles@mail.com", "Biology",72,"password"));
+        studentList.add(new Student("Nick@mail.com", "Computer Science",18,"superPass"));
+    }
+
+    @GetMapping("info/{email}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public @ResponseBody Student displayInfo(@PathVariable String email) {
+
+        for (Student student:studentList){
+            if(student.getEmail().equals(email))
+                return student;
+        }
+        throw new CustomException("Email was not found, check email and try again.");
+
+    }
+
+    @PostMapping("submit")
+    @ResponseStatus(HttpStatus.CREATED)
+    public @ResponseBody String submitInfo(@RequestParam String email,
+                                          @RequestParam String major,
+                                          @RequestParam int age,
+                                          @RequestParam String password){
+
+        studentList.add(new Student(email, major, age, password));
+        return "Successfully submitted";
+
+    }
+
+    @PutMapping("update")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public @ResponseBody void update(@RequestBody Student updatedStudent){
+        if(studentList.removeIf(student -> student.getEmail().equals(updatedStudent.getEmail()))) {
+            studentList.add(updatedStudent);
+            return;
+        }
+        throw new RuntimeException("Email was not registered, check email and try again. Or register new student.");
+    }
+
+    @ExceptionHandler({RuntimeException.class, CustomException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public @ResponseBody String handleNotFound(RuntimeException ex) {
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public @ResponseBody String handleMissingParams(MissingServletRequestParameterException ex) {
+        return ex.getParameterName() + " is missing in the query parameters and is required.";
+    }
+
+}
+First, we updated our displayInfo and update to instead throw a CustomException or RuntimeException. Then we included two @ExceptionHandlermethods, each to handle their respective exceptions. Along with this, we included @ResponseStatus annotations with the appropriate HttpStatus enum above our two new methods.
+
+
