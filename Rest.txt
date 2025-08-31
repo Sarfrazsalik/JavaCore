@@ -1,0 +1,120 @@
+Representational State Transfer (REST) is an architectural style that defines a set of constraints
+to be used for creating web services. 
+A REST API is a way of accessing web services in a simple and flexible way without having any 
+processing.
+
+REST technology is generally preferred to the more robust Simple Object Access Protocol (SOAP) 
+technology because REST uses less bandwidth, and is simple and flexible making it more suitable
+for internet usage.
+It’s used to fetch or give some information from a web service.
+All communication done via REST API uses only HTTP requests.
+
+REST Constraints
+
+There are some key constraints to think about when considering whether a RESTful API is the
+right type of API for your needs:
+
+Client-Server: This constraint operates on the concept that the client and the server should be
+separate from each other and allowed to evolve individually.
+
+Stateless: REST APIs are stateless, meaning that calls can be made independently of one another,
+and each call contains all of the data necessary to complete itself successfully.
+
+Cache: Because a stateless API can increase request overhead by handling large loads of incoming 
+and outbound calls, a REST API should be designed to encourage the storage of cacheable data.
+
+Uniform Interface: The key to the decoupling client from server is having a uniform interface that
+allows independent evolution of the application without having the application’s services, or 
+models and actions, tightly coupled to the API layer itself.
+
+Layered System: REST APIs have different layers of their architecture working together to build a
+hierarchy that helps create a more scalable and modular application.
+
+Code on Demand: Code on Demand allows for code or applets to be transmitted via the API for use 
+within the application.
+
+
+Using REST
+
+You access data via URLs.
+For example, /users/Ada lets you access data about a person named Ada.
+You use HTTP methods to access or change data.
+For example, you’d view Ada’s data by issuing a GET request to /people/Ada, and you’d modify
+Ada’s data by issuing a POST request to /people/Ada. 
+You can use the other HTTP methods (like PUT or DELETE) to interact with the data as well.
+
+You can represent data however you want.
+For example that GET request might return a JSON string that represents the user data. 
+The POST request might then take a JSON string. Or it could take a binary string, or XML, or a
+list of properties. It’s up to you.
+
+Each request should be standalone.
+In other words, you should not store session information on the server! Everything needed to
+fulfill a request must be included in the request itself!
+
+
+Understanding REST (Representational State Transfer) is crucial for modern web development for 
+several reasons:
+
+Standardization: REST has become the de facto standard for designing web APIs. Understanding REST
+allows developers to adhere to industry best practices and conventions when designing and 
+implementing APIs, promoting consistency and interoperability across different systems.
+
+Statelessness: RESTful APIs are stateless, meaning each request from a client contains all the 
+information necessary for the server to fulfill it. This architectural constraint simplifies 
+server implementation, improves scalability, and enables better fault tolerance and load balancing.
+
+Uniform Interface: REST emphasizes a uniform interface between clients and servers, typically 
+based on standard HTTP methods (GET, POST, PUT, DELETE) and representations (such as JSON or XML).
+This simplifies client-server interactions and enables the use of generic components like web browsers
+and proxies.
+
+Flexibility: Data is not tied to resources or methods, so REST can handle multiple types of 
+calls, return different data formats and even change structurally with the correct implementation 
+of hypermedia. REST is not constrained to XML, but instead can return XML, JSON, YAML or any other
+format depending on what the client requests.
+
+Interoperability: RESTful APIs can be consumed by clients written in any programming language and 
+running on any platform, as long as they adhere to the standard HTTP protocol. This 
+interoperability promotes collaboration and integration between different systems and 
+technologies.
+
+Let's consider an example of a website that provides access to book data. Programming languages 
+have many different libraries and frameworks to help you develop a REST API. When you access a 
+REST API's data, you don't need to know how the REST API works, you just need to know the 
+interface it provides. Let's say the book website provides the following API:
+
+The API will allow clients to perform CRUD (Create, Read, Update, Delete) operations on the book 
+resources using its interface, which is by sending HTTP request to the relevant URLS:
+
+GET request to www.notarealbooksite.com/api/books: Retrieve a list of all books.
+GET request to www.notarealbooksite.com/api/books/{id}: Retrieve details of a specific book 
+identified by its ID.
+POST request to www.notarealbooksite.com/api/books: Create a new book by providing the book
+details in the request body.
+PUT request to www.notarealbooksite.com/api/books/{id}: Update an existing book identified by 
+its ID with the provided details.
+DELETE request to /books/{id}: Delete a book identified by its ID.
+You can send these requests from a web browser or an application you develop that will use the
+data. An example request / response exchange could look like the following:
+
+Making the request on a terminal:
+
+curl -X GET https://www.notarealbooksite.com/api/books
+
+Data received from response body:
+
+[
+    {
+        "id": 1,
+        "title": "To Kill a Mockingbird",
+        "author": "Harper Lee",
+        "genre": "Fiction"
+    },
+    {
+        "id": 2,
+        "title": "1984",
+        "author": "George Orwell",
+        "genre": "Dystopian"
+    }
+]

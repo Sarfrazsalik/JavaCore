@@ -1,0 +1,70 @@
+The @RequestBody annotation in Spring MVC is used to indicate that a method parameter should be bound to the body of the HTTP request. It is typically used in controller methods to extract data from the request body and convert it into a Java object.
+
+When a method parameter is annotated with @RequestBody, Spring MVC automatically extracts the content of the HTTP request body and converts it into the appropriate Java object based on the content type of the request. @RequestBody REQUIRES that the information provided matches an object available to be mapped to.
+
+Example:
+
+@PostMapping("/create")
+public User createUser(@RequestBody User newUser) {
+
+    // ... logic
+
+}
+
+
+
+A simple application of @RequestBody might be when information is being sent in a POST request, such as when a user is being created, and we want our handler method to directly translate the body of the request into a User Java object.
+
+
+Consider an example application where we have students that can register using their email as a unique identifier. @RequestBody will help users request updating their student information through the update handler methods by observing the information inside of the request body and unmarshalling the JSON information into a Java object.
+
+Note: We will need a JSON processing library, like Jackson, as a dependency to our project to unmarshall JSON into Java objects.
+
+Student Controller:
+
+package com.sample.controller;
+
+import com.sample.model.Student;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+@RequestMapping("student")
+public class StudentController {
+
+    private List<Student> studentList = new ArrayList<>();
+
+    {
+        studentList.add(new Student("admin@mail.com", "IT",100,"adminPass"));
+        studentList.add(new Student("Charles@mail.com", "Biology",72,"password"));
+        studentList.add(new Student("Nick@mail.com", "Computer Science",18,"superPass"));
+    }
+
+    @PutMapping("update")
+    public @ResponseBody String update(@RequestBody Student updatedStudent){
+        if(studentList.removeIf(student -> student.getEmail().equals(updatedStudent.getEmail()))) {
+            studentList.add(updatedStudent);
+            return "Successfully updated";
+        }
+        return "Email was not registered, check email and try again. Or register new student.";
+    }
+
+}
+Below are examples of using this application:
+
+We can include the following JSON object in our request body using an application like Postman:
+
+{
+    "email": "admin@mail.com",
+    "major": "ADMIN",
+    "age": 100,
+    "password": "adminPass"
+}
+We can submit a PUT request to http://localhost:8080/student/update to invoke the update handler method
+
+This should return back that it was successfully updated:
+
+

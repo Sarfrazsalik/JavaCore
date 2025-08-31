@@ -1,0 +1,233 @@
+Unit Testing can be done via two approaches, manual testing or automated testing. In both the 
+approaches the workflow remains common:
+
+Creating a test case
+Reviewing it
+Rework if corrections needed
+Execute the test case
+Analyze the test results
+
+Automated Testing is preferred over manual testing for the following reasons:
+
+Manual testing requires a great deal of human effort.
+Manual testing also requires more resources to be allocated.
+Schedule constraints may put time allocated for testing at a premium.
+Developers can use a testing framework for creating automated unit test cases.
+
+The following are common features that testing frameworks provide:
+
+In order to verify if the code is working as expected, test cases with specific checkpoints or
+verification criteria are created.
+The tests are executed by the framework.
+The framework will report a summarized result on the passed test cases and failed ones.
+
+
+
+JUnit is an open-source framework that is used for writing and executing unit tests in Java
+programming language. It is one of the best-known testing frameworks.
+
+Some characteristics of JUnit:
+
+Annotations are used to support, identify, and execute test method features.
+Assertions are used to check actual output versus expected output.
+It provides a Test Runner for executing the tests.
+JUnit provides a basic built-in template so that you may write small, simple test cases in no
+time.
+JUnit tests help you to write independent modules, thereby bettering the coverage of the test and
+the quality of the application.
+
+
+Examples Of JUnit Test cases
+
+Given below are the two examples of a very basic Hello World program to get an understanding of 
+how a JUnit test class looks like or how different does it look when compared with a usual Java 
+class file.
+
+Example 1
+Here is a JUnit testcase HelloWorldJUnit.java that verifies that the string “Hello world” matches
+the string “hello world” which fails on execution, as the match is case sensitive. 
+Hence, the two strings don’t match and the test fails.
+
+The code for HelloWorldJUnit.java
+
+package demo.tests;
+import static org.junit.Assert.*;
+import org.junit.Test;
+public class HelloWorldJUnit {
+    @Test
+    public void test() {
+        assertEquals("Hello world","hello world");  
+    }
+}
+Example 2
+Here, we will see how a typical Java class interacts with a JUnit test case. We create a Java
+class file HelloWorld_Java.java with a constructor that allows us to pass a String value and a
+method getText() to fetch the string value.
+
+In the JUnit Test class HelloWorldJUnit.java has a test that creates a HelloWorld_Java object 
+and passes a String into the constructor call. The assertEquals() from JUnit verifies if the 
+expected and actual string values match.
+
+The code for HelloWorld_Java.java:
+
+
+public class HelloWorld_Java {
+    
+    private String s;
+    public HelloWorld_Java(String s){
+        this.s = s;
+    }
+
+    public String getText(){
+        return this.s;
+    }
+}
+The code for HelloWorldJUnit.java:
+
+public class HelloWorldJUnit{
+    
+    @Test
+    public void test() {
+        HelloWorld_Java hw=new HelloWorld_Java("Hello World");
+        assertEquals(hw.getText(),"Hello World");   
+    }
+}
+Since the strings match, the code will pass the JUnit test.
+
+
+Unit Testing
+Generally, software goes under four level of testing: Unit Testing, Integration Testing, System 
+Testing, and Acceptance Testing but sometimes due to time constraints, software testers do 
+minimal unit testing.
+
+Some crucial reasons for unit testing are listed below:
+
+Unit testing helps testers and developers understand the root causes of errors.
+Unit testing helps with documentation.
+Unit testing fixes defects early in the development phase.
+Unit testing helps with code reusability.
+Here are some best practices for using JUnit in the real world:
+
+Always test Core Methods:
+It's not always possible to get 100% code coverage, so don't aim to write unit tests for each 
+method. Instead, write unit tests for a method that is likely to have bugs during maintenance.
+
+Always test core method and core classes which are used heavily by different parts of a program.
+
+Run the JUnit test as part of the Build Process
+You should Integrate Junit tests with your build script so that with every compile your tests run
+automatically.
+
+Always Test for boundary Conditions
+Develop test cases based on usage and boundary conditions.
+
+Align Tests with Business Requirements
+Make sure your JUnit test is aligned with your business requirement specifications.
+
+Tests for Non-Functional Requirements
+Write a test for the non-functional requirements as well.
+For example, while writing a Thread-safe class, it's important to write tests that try to break 
+thread safety.
+
+Test for Ordering
+If a function or method depends on upon the order of events then make sure your JUnit test covers
+ordering requirements.
+Test both correct ordering and incorrect ordering.
+
+Use Tools
+You should always use available tools provided by your framework.
+
+In this example we are implementing a Temperature Converter that either converts a Fahrenheit 
+temperature to Celsius or vice versa.
+
+First we design the interface:
+package tdd;
+
+// 1. design our interface
+public interface TemperatureConverter {
+
+
+    double farenheitToCelcius(double temp);
+    double celciusToFarenheit(double temp);
+
+    double convertTemp(double temp, String from, String to);
+
+}
+Then we write the tests:
+package tdd;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
+
+// 1. So long as the Test method finishes without throwing an exception as test is considered passed
+// 2. Assertions are just methods that throw an exception if the assertion is false
+// 3. All Test methods are VOID. That is a JUnit thing.
+
+// TDD is more than just seeing if your code works
+// they are instrumental in DESIGNING your applications
+
+public class TemperatureTests {
+
+    TemperatureConverter converter = new TempConverterImpl();
+
+    @Test
+    void celcius_to_farenheit(){ // only acceptable use case of underscores in Java
+        double result = this.converter.celciusToFarenheit(100);
+        Assertions.assertEquals(212, result, 0.1);// by how much it can be off
+    }
+
+    @Test
+    void farenheit_to_celcius(){
+        double result = this.converter.farenheitToCelcius(212);
+        Assertions.assertEquals(100,result, 0.1);
+    }
+
+    @Test // negative test. makes sures something fails appropriately
+    void absolute_Zero_raises_exception(){
+        Assertions.assertThrows(RuntimeException.class, ()->{
+            this.converter.celciusToFarenheit(-400);
+        });
+    }
+
+    @Test
+    void kelvin_celcius(){
+        // do we care if it is case sensitive?
+        // what do we do if it misspelled?
+        // should we allow the letter k,s,c to indicate temperature?
+        double result = this.converter.convertTemp(100,"kelvin", "celcius");
+        Assertions.assertEquals(-173.15,result);
+    }
+
+    @Test
+    void case_insensitive(){
+        double result = this.converter.convertTemp(100,"KeLVin", "cElcIus");
+        Assertions.assertEquals(-173.15,result);
+    }
+
+}
+Then we write the code:
+package tdd;
+
+public class TempConverterImpl implements TemperatureConverter{
+
+    @Override
+    public double farenheitToCelcius(double temp) {
+        double celcius = (temp-32)*5/9;
+        return celcius;
+    }
+
+    @Override
+    public double celciusToFarenheit(double temp) {
+        if(temp <= -273.15){
+            throw  new RuntimeException("Input was below absolute zero");
+        }
+        double f = (9d/5d*temp) + 32;
+        return f;
+    }
+
+    @Override
+    public double convertTemp(double temp, String from, String to) {
+        return 0;
+    }
+}

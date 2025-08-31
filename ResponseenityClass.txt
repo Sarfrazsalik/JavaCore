@@ -1,0 +1,89 @@
+ResponseEntity is a class that is meant to represent the entire HTTP response, offering the ability to control anything included in the response such as status codes, headers, and the response body. This allows for a lot more flexibility when it comes to the following:
+
+The body is included and can be given a generic to help ensure the type safety of the API's HTTP responses.
+Optionally, we can include header information without requiring to directly touch the HttpServletResponse.
+Incorporating status codes, especially for handler methods that may not always behave the same way.
+HTTP Status Code
+ResponseEntity allows you to specify the HTTP status code to be returned in the response. You can use predefined constants from the HttpStatus enum or provide a custom status code. For example, HttpStatus.OK, HttpStatus.CREATED, HttpStatus.NOT_FOUND, etc.
+
+Headers
+You can add custom headers to the response using the header() method of ResponseEntity. This allows you to include additional metadata in the response, such as content type, caching directives, authentication tokens, etc.
+
+Body
+ResponseEntity supports returning a response body along with the status code and headers. You can pass the body content as a parameter to the constructor or use the body() method to set the body content. The body can be of any type, including Java objects, collections, strings, etc.
+
+The ResponseEntity class offers flexible control of our HTTP Response through several static methods such as:
+
+.status() method takes in either the int status code or the HttpStatus enum
+.body() allows for information & objects to be passed back in the HTTP response body
+.header() which takes in two strings for the key-value pair in the HTTP Response headers
+.build() for anything that doesn't have a body included with it
+Example:
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class ExampleController {
+
+    @GetMapping("/hello")
+    public ResponseEntity<String> hello() {
+        String message = "Hello, World!";
+        return ResponseEntity.ok(message);
+    }
+
+    @GetMapping("/error")
+    public ResponseEntity<String> error() {
+        String errorMessage = "Internal Server Error";
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                             .body(errorMessage);
+    }
+}
+
+
+
+
+ResponseEntity helps build flexible responses by giving us complete control of our HTTP response. By utilizing the static methods in the ResponseEntity class, we can have the ability to create custom HTTP responses.
+
+
+Consider an example application where we have students that can submit their information. ResponseEntity<Object> will replace the method signature return type of our handler method, and Object would be replaced with that type that we intend on returning. Our return statement will now contain ResponseEntity static methods for constructing our HTTP response.
+
+Student Controller:
+
+package com.sample.controller;
+
+import com.sample.model.Student;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+@RequestMapping("student")
+public class StudentController {
+
+    private List<Student> studentList = new ArrayList<>();
+
+    {
+        studentList.add(new Student("admin@mail.com", "IT",100,"adminPass"));
+        studentList.add(new Student("Charles@mail.com", "Biology",72,"password"));
+        studentList.add(new Student("Nick@mail.com", "Computer Science",18,"superPass"));
+    }
+
+    @PostMapping("submit")
+    public @ResponseBody ResponseEntity<String> submitInfo(@RequestParam String email,
+                                          @RequestParam String major,
+                                          @RequestParam int age,
+                                          @RequestParam String password){
+
+        studentList.add(new Student(email, major, age, password));
+        return ResponseEntity.status(201)
+                .body("Successfully Registered");
+
+    }
+
+}
+

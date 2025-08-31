@@ -1,0 +1,232 @@
+The Optional class in Java is a container object that may or may not contain a non-null value. It was introduced in Java 8 as a way to handle scenarios where methods might return null values. Optional encourages developers to explicitly handle the case where the value may be absent. This makes the code more expressive and helps to avoid unexpected null pointer exceptions.
+
+Optional methods
+Optional is a generic class that can contain a value of type T, or it may be empty. It provides methods for accessing and manipulating the value if present. See the below methods:
+
+of(value): Creates an Optional containing the specified non-null value. If the specified value is null, it throws a NullPointerException.
+Example: Optional.of("biscuits")
+ofNullable(value): Creates an Optional containing the specified value, which may be null. If the specified value is null, it returns an empty Optional.
+Example: Optional.ofNullable(null)
+empty(): Returns an empty Optional instance. Represents the absence of a value.
+Example: Optional.empty()
+isPresent(): Returns true if the Optional contains a non-null value, otherwise returns false.
+Example: optional.isPresent()
+ifPresent(consumer): If a value is present, performs the given action with the value, otherwise does nothing. Note that this method does not return a value.
+Example: optional.ifPresent(value -> System.out.println(value))
+get(): If a value is present, returns the value, otherwise throws a NoSuchElementException.
+Example: optional.get()
+orElse(other): If a value is present, returns the value, otherwise returns the specified other value.
+Example: optional.orElse("some other value")
+orElseGet(Supplier): If a value is present, returns the value, otherwise returns the result produced by the specified Supplier.
+Example: optional.orElseGet(() -> "some other value")
+orElseThrow(Supplier): If a value is present, returns the value, otherwise throws an exception created by the provided Supplier.
+Example: optional.orElseThrow(() -> new RuntimeException("Value not present"))
+map(Function): If a value is present, applies the given mapping function to it and returns an Optional containing the result, otherwise returns an empty Optional.
+Example: optional.map(value -> value.toUpperCase())
+flatMap(Function): If a value is present, applies the given mapping function to it, which must return an Optional, and returns the result, otherwise returns an empty Optional.
+Example: optional.flatMap(value -> Optional.of(value.toUpperCase()))
+filter(Predicate): If a value is present and matches the given predicate, returns an Optional containing the value, otherwise returns an empty Optional.
+Example: optional.filter(value -> value.length() > 5)
+When to Use orElse() vs orElseGet()
+It is recommended to use orElse() when the value to be returned is a simple constant value or an already computed value. For a value resulting from a complex or expensive computation, then it is recommended to use orElseGet(). The reason for this is that orElseGet() takes a Supplier function as an argument, and that method will be evaluated only if the Optional does not have a value to return. This is known as lazy evaluation. If you were to pass an equivalent method call into the OrElse() function as an argument, that call will be evaluated to retrieve its value, even if the Optional did already have a value present.
+
+When to Use map() vs flatMap()
+It is recommended to use map() when the transformation function returns a non-optional value and you want to keep the result wrapped in an Optional. Use flatMap() when the transformation function returns an Optional itself, and you want to flatten the result to avoid nested Optional instances.
+
+Resources
+Java documentation: https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html
+Oracle article: https://www.oracle.com/technical-resources/articles/java/java8-optional.html
+
+
+
+The Java Optional class provides a way to represent values that may or may not be present. While it might not seem immediately obvious how this class could be used in real-world applications, there are several scenarios where it can be beneficial:
+
+API Design: Optional can be used in the design of APIs to clearly communicate to users whether a method can return null or not. By returning Optional instead of null, API designers can force users to explicitly handle the case where the value might be absent, improving the clarity and reliability of the API.
+Stream Processing: Optional integrates well with Java Streams, allowing developers to process streams of data containing optional values. This can be useful when dealing with collections where some elements might be null or absent.
+Configuration Settings: Optional can be used to represent optional configuration settings or parameters. For example, a method that reads configuration settings from a file could return an Optional containing the value of a specific setting, or an empty Optional if the setting is not present.
+Overall, the Java Optional class can be a powerful tool for writing more robust, clear, and expressive code, especially in scenarios where values may or may not be present. By using Optional, developers can make their code more explicit about the possibility of null values and provide better error handling and clarity in their applications.
+
+
+
+Below are some examples of using the Optional class.
+
+Example 1:
+
+// Java program to illustrate
+// optional class methods
+ 
+import java.util.Optional;
+ 
+class Rev {
+ 
+    // Driver code
+    public static void main(String[] args)
+    {
+ 
+        // creating a string array
+        String[] str = new String[5];
+ 
+        // Setting value for 2nd index
+        str[2] = "hello world";
+ 
+        // It returns an empty instance of Optional class
+        Optional<String> empty = Optional.empty();
+        System.out.println(empty);
+ 
+        // It returns a non-empty Optional
+        Optional<String> value = Optional.of(str[2]);
+        System.out.println(value);
+    }
+}
+Output:
+
+Optional.empty
+Optional[hello world]
+In the above example, we used Optional.empty() to create an Optional object that does not hold a value. We then used Optional.of() to create another Optional object that contains a String value within it.
+
+Example 2:
+
+// Java program to illustrate
+// optional class methods
+ 
+import java.util.Optional;
+ 
+class Rev {
+ 
+    // Driver code
+    public static void main(String[] args)
+    {
+ 
+        // creating a string array
+        String[] str = new String[5];
+ 
+        // Setting value for 2nd index
+        str[2] = "hello world";
+ 
+        // It returns a non-empty Optional
+        Optional<String> value = Optional.of(str[2]);
+ 
+        // It returns value of an Optional.
+        // If value is not present, it throws
+        // an NoSuchElementException
+        System.out.println(value.get());
+ 
+        // It returns hashCode of the value
+        System.out.println(value.hashCode());
+ 
+        // It returns true if value is present,
+        // otherwise false
+        System.out.println(value.isPresent());
+    }
+}
+Output:
+
+hello world
+1967487235
+true
+In the above example, we use an Optional object's get() method to get it's value, if it has one. We want to be careful when calling this method, and it is recommended that we first ensure that there is a value with isPresent(), otherwise an exception will be thrown.
+
+Exercises (Optional)
+The exercises will focus around a PhoneBook class. The phone book already has some initial values:
+
+Ted Striker Roger Murdock Elaine Dickinson
+
+The partial code is below:
+
+package optionals;
+
+import java.util.*;
+
+public class PhoneBook {
+
+    private static final HashMap<String, String> PHONE_NUMBERS = new HashMap<String, String>() {
+        {
+            put("Ted Striker", "5551212");
+            put("Roger Murdock", "3879812");
+            put("Elaine Dickinson", "8675309");
+            put("Jos de Vos", "016/161616");
+        }
+    };
+
+    private HashMap<String, String> phoneBookEntries = PHONE_NUMBERS;
+
+    PhoneBook() { }
+
+    public HashMap<String, String> getPhoneBookEntries() {
+        return phoneBookEntries;
+    }
+
+    public Optional<String> findPhoneNumberByName(String name){
+        return null;
+    }
+
+    public Optional<String> findNameByPhoneNumber(String phoneNumber){
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        System.out.println("Hello from PhoneBook's toString method");
+        return "PhoneBook{" +
+                "phoneBookEntries=" + phoneBookEntries +
+                '}';
+    }
+}
+
+Exercise: Implement findPhoneNumberByName() and findNameByPhoneNumber() in PhoneBook class that returns an Optional. An empty Optional must be returned if nothing is found.
+
+Test your implementation with the code below:
+
+package optionals;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class PhoneBookTest {
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    private PhoneBook phoneBook = new PhoneBook();
+
+    @Test
+    public void findPhoneNumberByName() {
+        Optional<String> phoneNumber = phoneBook.findPhoneNumberByName("Jos de Vos");
+
+        assertThat(phoneNumber.get()).isEqualTo("016/161616");
+    }
+
+    @Test
+    public void findPhoneNumberByName_NotFound() {
+        expectedException.expect(NoSuchElementException.class);
+
+        Optional<String> phoneNumber = phoneBook.findPhoneNumberByName("Jos de Voss");
+
+        phoneNumber.get();
+    }
+
+    @Test
+    public void findNameByPhoneNumber() {
+        Optional<String> name = phoneBook.findNameByPhoneNumber("016/161616");
+
+        assertThat(name.get()).isEqualTo("Jos de Vos");
+    }
+
+    @Test
+    public void findNameByPhoneNumber_NotFound() {
+        expectedException.expect(NoSuchElementException.class);
+
+        Optional<String> phoneNumber = phoneBook.findPhoneNumberByName("016/161619");
+
+        phoneNumber.get();
+    }
+
+}
+
+

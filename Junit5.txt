@@ -1,0 +1,303 @@
+JUnit 5 is a complete rewrite of the framework and requires Java 8, though it can test Java code
+that is written in older Java versions. It allows using lambdas in assertions, a feature you might
+already know from the popular assertion library AssertJ.
+Unlike its predecessor, JUnit 5 is not an all-in-one library but instead provides a set of well-
+structured modules.
+
+JUnit 5 tests look a lot like JUnit 4 tests: just create a class and add test methods annotated
+with @Test. However, JUnit 5 provides a completely new set of annotations which resides in a 
+different package than their JUnit 4 counterparts. 
+In addition, the assertion methods moved from org.junit.Assert to junit.jupiter.api.Assertions.
+
+
+JUnit 5 Assertions
+The available assertion methods in JUnit 5 are similiar to JUnit 4. The Assertions class provides
+assertTrue, assertEquals, assertNull, assertSame and their negative equivalents. 
+What’s new is the overloaded versions of these methods that expect a lambda expression to supply
+the assertion message or boolean condition.
+On top of that, there is a new feature called Grouped Assertions which allows the execution of a
+group of assertions and have failures reported together. It was previously bad practice to put 
+multiple assertions into one test to avoid assertions not being executed after a previous failure.
+Now we can group the respective assertions together.
+
+Another improvement over JUnit 4 is the way to assert on expected exceptions. 
+Instead of putting the expected exception type into the @Test annotation or wrapping your test
+code into a try-catch, you can use assertThrows and equalsThrows.
+
+Testing Best Practices
+
+When it comes to testing code, a few best practices to follow include:
+
+Utilize dependency injection
+Write testable code
+Use a mocking library like Mockito for dependencies
+Measure your code coverage with a tool like Jacoco
+Externalize test data when possible (i.e. read in the test data from an external file or generate
+it dynamically)
+Generally, you still want to use only 1 assert statement per test - this ensures you can pinpoint
+the defect when debugging
+Write deterministic tests (they shouldn't fail sometimes and pass other times - otherwise known 
+as "flaky" tests)
+
+
+
+For the following coding examples showcase how to create unit tests using JUnit 5.
+
+@Test Annotation
+class JUnit5TestAnnotationTest{
+    @Test
+    void myTestAnnotationTest() {
+        assertEquals(4, 2 + 2);
+    }
+}
+@ParameterizedTest
+@ParameterizedTest
+@ValueSource(strings = { "Jack", "Jane", "Michael" })
+void genderByNameTest(String name) {
+    assertTrue(isMan(name));
+}
+@RepeatTest
+@RepeatedTest(10)
+void repeatedTest() {
+   // Repeats 10 times.
+}
+
+@RepeatedTest(3)
+void repeatedTestWithRepetitionInfo(RepetitionInfo repetitionInfo) {
+    assertEquals(3, repetitionInfo.getTotalRepetitions());
+}
+
+@RepeatedTest(value = 1, name = "{displayName} {currentRepetition}/{totalRepetitions}")
+
+@DisplayName
+@DisplayName("My Test Class Name")
+class DisplayNameTest {
+    @Test
+    @DisplayName("My Test Name")
+    void testWithDisplayName() {
+    }
+}
+@BeforeEach & @AfterEach
+class MyTestClass{
+    @BeforeEach
+    void setup() {
+        log.info("@BeforeEach executes before each test method in this class.");
+    }
+    @Test
+    void myTestMethod() {
+    }
+    @AfterEach
+    void tearDown() {
+        log.info("@AfterEach executes after each test method in this class.");
+    }
+}
+@BeforeAll & @AfterAll
+class MyTestClass{
+    @BeforeAll
+    static void initAll() {
+          log.info("@BeforeAll executes once before all test methods in this class.");
+    }
+    @Test
+    void myTestMethod() {
+    }
+    @AfterAll
+    static void tearDownAll() {
+          log.info("@AfterAll executes once after all test methods in this class.");
+    }
+}
+@Nested
+The nested annotation denotes that the annotated class is nested. It is a non-static test class.
+@BeforeAll and @AfterAll methods cannot be used directly in a @Nested test class.
+
+@DisplayName("A stack")
+class TestingAStackDemo {
+    Stack<Object> stack;
+    @Test
+    @DisplayName("is instantiated with new Stack()")
+    void isInstantiatedWithNew() {
+        new Stack<>();
+    }
+    @Nested
+    @DisplayName("when new")
+    class WhenNew {
+        @BeforeEach
+        void createNewStack() {
+            stack = new Stack<>();
+        }
+        @Test
+        @DisplayName("is empty")
+        void isEmpty() {
+            assertTrue(stack.isEmpty());
+        }
+        @Test
+        @DisplayName("throws EmptyStackException when popped")
+        void throwsExceptionWhenPopped() {
+            assertThrows(EmptyStackException.class, () -> stack.pop());
+        }
+        @Test
+        @DisplayName("throws EmptyStackException when peeked")
+        void throwsExceptionWhenPeeked() {
+            assertThrows(EmptyStackException.class, () -> stack.peek());
+        }
+        @Nested
+        @DisplayName("after pushing an element")
+        class AfterPushing {
+            String anElement = "an element";
+            @BeforeEach
+            void pushAnElement() {
+                stack.push(anElement);
+            }
+            @Test
+            @DisplayName("it is no longer empty")
+            void isNotEmpty() {
+                assertFalse(stack.isEmpty());
+            }
+            @Test
+            @DisplayName("returns the element when popped and is empty")
+            void returnElementWhenPopped() {
+                assertEquals(anElement, stack.pop());
+                assertTrue(stack.isEmpty());
+            }
+            @Test
+            @DisplayName("returns the element when peeked but remains not empty")
+            void returnElementWhenPeeked() {
+                assertEquals(anElement, stack.peek());
+                assertFalse(stack.isEmpty());
+            }
+        }
+    }
+}
+
+
+
+The following code is an example of using annotations and assertions in JUnit. Here, we have a
+class called NumberUtility that will accept an integer as an input and determine if it is prime,
+returning a Boolean value depending on if the integer is prime. 
+We will use JUnit annotations and assertions to test the program.
+
+First, this the NumberUtility program:
+
+package com.revature.utility;
+
+public class NumberUtility {
+
+	// true if a number is prime
+	// false if a number is not prime
+	// Prime: a number that can be divided only by
+	// itself and 1
+	// 2, 3, 5, 7, 11, 13
+	public boolean isPrime(int number) {
+		if (number <= 1) { // edge case
+			return false;
+		}
+		
+		for (int i = 2; i < number; i++) {
+			if (number % i == 0) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+}
+Following this is a class called NumberUtilityTest which uses assertions and annotations and
+assertions to test the NumberUtility class:
+
+package com.revature.utility;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+// This class will contain various test methods
+// for the NumberUtility class
+public class NumberUtilityTest {
+
+	
+	public static NumberUtility nu;
+	// @Test: used to signify that a method is a test case
+	// @BeforeAll: used to signify that a method is going to run
+	// before all of the test case methods
+	// @BeforeEach: used to signify that a method is going to run
+	// before each test case
+	// @AfterEach: used to signify that a method is going to run
+	// after each test case
+	// @AfterAll: used to signify that a method is going to run
+	// after all of the test case methods
+	
+	@BeforeAll
+	public static void setup() {
+		nu = new NumberUtility();
+		System.out.println("Runs once before all test methods in the class");
+	}
+	
+//	@BeforeEach
+//	public void init() {
+//		System.out.println("Runs before each test method");
+//	}
+//	
+//	@AfterEach
+//	public void tearDown() {
+//		System.out.println("Runs after each test method");
+//	}
+//	
+//	@AfterAll
+//	public static void done() {
+//		System.out.println("Runs once after all test methods in the class");
+//	}
+	
+	
+	// We will write some unit tests inside of this class
+	
+	@Test
+	public void testIsPrime_1_shouldBeFalse() {
+		
+		/*
+		 * AAA
+		 * 
+		 * Arrange: set up the required objects/configurations
+		 * Act: use (invoke) whatever you want to test
+		 * Assert: check to see if the output is what you expected
+		 * 
+		 */
+		
+		// Arrange
+//		NumberUtility nu = new NumberUtility();
+		
+		// Act
+		boolean actual = nu.isPrime(1); // actual output
+		
+		// Assert
+		boolean expected = false;
+		Assertions.assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testIsPrime_13_shouldBeTrue() {
+		// Arrange
+//		NumberUtility nu = new NumberUtility();
+		
+		// Act
+		boolean actual = nu.isPrime(13);
+		
+		// Assert
+		Assertions.assertTrue(actual);
+	}
+	
+	@Test
+	public void testIsPrime_negative1000_shouldBeFalse() {
+		// Arrange
+//		NumberUtility nu = new NumberUtility();
+		
+		// Act
+		boolean actual = nu.isPrime(-1000);
+		
+		// Assert
+		Assertions.assertFalse(actual);
+	}
+	
+}

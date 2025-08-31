@@ -1,0 +1,28 @@
+@RestController is a specialized version of the controller that incorporates the @Controller and @ResponseBody resulting in easier controller implementation as your methods no longer require the @ResponseBody before the return type in each method signature.
+
+Example:
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class HelloController {
+
+    @GetMapping("/hello")
+    public String hello() {
+        return "Hello, World!";
+    }
+}
+
+Notice that we no longer need the @ResponseBody annotation anywhere in the class.
+
+
+
+@RestController helps with rapid development and ensuring that a response is always given to the users based on the HTTP requests they've given to the API such as logging in, requesting information, updating information, registering, etc.
+
+
+
+@RestController helps with rapid development and ensuring that a response is always given to the users based on the HTTP requests they've given to the API such as logging in, requesting information, updating information, registering, etc.
+
+
+    

@@ -1,0 +1,82 @@
+@RequestParam and @PathVariable annotations are used to extract values from the request URI.
+
+@RequestParam
+@RequestParam extracts values from the query string.
+It is encoded as the values are taken from a query string but not directly from the path.
+@PathVariable
+@PathVariable extracts values from the URI path.
+As it extracts values from the URI path, it is not encoded.
+
+
+Real-World Application
+A simple application of @PathVariable is getting data from an endpoint that identifies an entity with a primary key like the student_id, employerr_id, branch_id and user_id etc.
+Using RequestParam all the data provided by the user on the registration page and bind it to the request parameter.
+
+
+Consider the same example user for student registration where our email acts as our unique identifier for 
+each student.
+
+@PathVariable will help users request student information through the displayInfo handler methods addition 
+parameter "email" that must match exactly to the contents of the @GetMapping path value inside of the '{}', in this case "email".
+@RequestParam will help users register through the submitInfo handler method to use of query parameters inside of their URL. Our method requires an @RequestParam attached to each defined method parameter requiring to be included in the URL query.
+For a temporary solution, we will use an ArrayList studentList to store information in memory for student information requests and registrations.
+WE would update the Student Controller to reflect the below.
+
+Student Controller
+
+package com.sample.controller;
+
+import com.sample.model.Student;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+@RequestMapping("student")
+public class StudentController {
+
+    private List<Student> studentList = new ArrayList<>();
+
+    {
+        studentList.add(new Student("admin@mail.com", "IT",100,"adminPass"));
+        studentList.add(new Student("Charles@mail.com", "Biology",72,"password"));
+        studentList.add(new Student("Nick@mail.com", "Computer Science",18,"superPass"));
+    }
+
+    @GetMapping("info/{email}")
+    public @ResponseBody Student displayInfo(@PathVariable String email){
+
+        for (Student student:studentList){
+            if(student.getEmail().equals(email))
+                return student;
+        }
+        return null;
+
+    }
+
+    @PostMapping("submit")
+    public @ResponseBody String submit(@RequestParam String email,
+                                          @RequestParam String major,
+                                          @RequestParam int age,
+                                          @RequestParam String password){
+
+        studentList.add(new Student(email, major, age, password));
+        return "Successfully submitted";
+
+    }
+}
+Once we made the updates we would be able to boot up our Spring Boot application and using Postman make the following requests:
+
+A GET request to http://localhost:8080/student/info/admin@mail.com to invoke the displayInfo handler method
+
+This should return back all the information about that student in the form of JSON information as seen in the image below:
+
+
+A POST request to localhost:8080/student/submit?email=test@mail.com&major=testing&age=42&password=megaPass to invoke the submitInfo handler method.
+
+This will register the new student by adding it to the temporary list that exists in memory. Invoked the GET request above to see the newly registered student by http://localhost:8080/student/info/{newly-registered-email-here}
+
+
+   

@@ -1,0 +1,290 @@
+The scope of a bean defines its life cycle and visibility of that bean.
+
+Bean Scopes
+Singleton:
+In singleton scope, the container creates a single instance of that bean.
+It is defined explicitly by using @Scope("singleton") or @Scope(value= ConfigurableBeanFactory.SCOPE_SINGLETON)
+All requests for that bean name will return the same object, which is cached.
+Any modifications to the object will be reflected in all references to the bean.
+This scope is the default value if no other scope is specified.
+Note: Singleton scope creates a single instance of the class for an ApplicationContext whereas the Singleton Design pattern ensures that a single instance of the class is used for the entire application.
+
+Prototype:
+The prototype scope will return a different instance every time it is requested from the container.
+It is defined by setting the value prototype to the @Scope("prototype") annotation or ``@Scopevalue=(ConfigurableBeanFactory.SCOPE_PROTOTYPE)` in the bean definition.
+A prototype bean is not initialized by Spring IoC until an object is created.
+If a Singleton class has a prototype class dependency, the prototype class is initialized along 
+with the singleton class.
+
+When a prototype class object is injected into the singleton class a single instance of the 
+prototype class is created.
+
+This can be avoided by using AOP proxy object and @Lookup.
+
+Web Aware Scopes
+
+Request:
+
+The request scope creates a bean instance for a single HTTP request.
+Session:
+
+The session scope creates a bean instance for an HTTP Session.
+Application:
+
+The application scope creates the bean instance for the lifecycle of a ServletContext.
+
+Websocket:
+
+The WebSocket scope creates it for a particular WebSocket session.
+
+
+Singleton scope is used for stateless beans (Business logic) and Prototype scope is used for
+stateful beans (Business logic and State).
+
+Singleton Example
+A class named Singleton is created with singleton scope:
+
+package com.bean.app;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Component;
+
+@Component
+public class Singleton {
+    
+    Singleton(){
+        System.out.println("Singleton bean initialized");
+
+}
+App.java
+
+package com.bean.app;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class App {
+    
+    public static void main(String[] args) {
+        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+        Singleton s1 = (Singleton) context.getBean("singleton");
+        Singleton s2 = (Singleton) context.getBean("singleton");
+        
+        if(s1==s2)
+        {
+            System.out.println(s1);
+            System.out.println(s2);
+            System.out.println("Same object is created");
+        }
+    }
+
+}
+Console:
+
+Singleton
+
+Prototype
+Prototype.java
+
+package com.bean.app;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+@Component
+@Scope(value = "prototype")
+public class Prototype {
+    Prototype(){
+        System.out.println("Prototype Class initialized");
+    }
+
+    void printMessage() {
+        System.out.println("Prototype");
+    }
+}
+App.java
+
+package com.bean.app;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class App {
+    
+    public static void main(String[] args) {
+        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+        Prototype  p1 = (Prototype) context.getBean("prototype"); 
+        Prototype  p2 = (Prototype) context.getBean("prototype"); 
+        
+        if(p1!=p2) {
+            System.out.println(p1);
+            System.out.println(p2);
+            System.out.println("Objects are not same");
+        }
+        
+        
+    }
+
+}
+
+Console:
+
+Prototype
+
+Injecting prototype dependency to a singleton class
+Singleton.java
+
+package com.bean.app;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Component;
+
+@Component
+public class Singleton {
+    
+    @Autowired
+    private Prototype prototype;
+    
+    
+    
+    public Prototye getPrototype() {
+        return prototype;
+    }
+    
+    public void setPrototype(Prototye prototype) {
+        this.prototype = prototype;
+    }
+    Singleton(){
+        System.out.println("Singleton bean initialized");
+        
+    }
+    void printMessage() {
+        System.out.println("Singleton");
+    
+    }
+    
+
+}
+App.java
+
+package com.bean.app;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class App {
+    
+    public static void main(String[] args) {
+        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+        Singleton s1 = (Singleton) context.getBean("singleton");
+        Singleton s2 = (Singleton) context.getBean("singleton");
+        
+        if(s1==s2)
+        {
+            System.out.println(s1.getPrototype());
+            System.out.println(s2.getPrototype());
+        }
+        
+        
+    }
+
+}
+Console:
+
+Prototype Dependency
+
+Using AOP proxy
+Prototype.java
+
+package com.bean.app;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Component;
+
+@Component
+@Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class Prototype {
+    Prototype(){
+        System.out.println("Prototype Class initialized");
+    }
+
+    void printMessage() {
+        System.out.println("Prototype");
+    }
+}
+Proxy
+
+Using @Lookup
+Singleton.java
+
+package com.bean.app;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Component;
+
+@Component
+public class Singleton {
+    
+    @Autowired
+    private Prototype prototype;
+    
+    
+    
+    public Prototype getPrototype() {
+        return prototype;
+    }
+    
+    public void setPrototype(Prototype prototype) {
+        this.prototype = prototype;
+    }
+    Singleton(){
+        System.out.println("Singleton bean initialized");
+        
+    }
+    void printMessage() {
+        System.out.println("Singleton");
+    
+    }
+    
+    @Lookup
+    Prototype createPrototype() {
+        return null;
+    }
+
+}
+App.java
+
+package com.bean.app;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class App {
+    
+    public static void main(String[] args) {
+        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+        Singleton s1 = (Singleton) context.getBean("singleton");
+        Singleton s2 = (Singleton) context.getBean("singleton");
+        
+        if(s1==s2)
+        {
+            System.out.println(s1.createPrototype());
+            System.out.println(s2.createPrototype());
+        }   
+        
+    }
+
+}
+Console:
+
+Lookup

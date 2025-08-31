@@ -1,0 +1,156 @@
+Producer-Consumer Problem
+The Producer-Consumer problem is a classic example of a multi-process synchronization problem. Here, we have a fixed-size buffer and two classes of threads - producers and consumers. Producers produces the data to the queue and Consumers consume the data from the queue. Both producer and consumer shares the same fixed-size buffer as a queue.
+
+Problem - The producer should produce data only when the queue is not full. If the queue is full, then the producer shouldn't be allowed to put any data into the queue. The consumer should consume data only when the queue is not empty. If the queue is empty, then the consumer shouldn't be allowed to take any data from the queue.
+
+Solution - We can solve the Producer-Consumer problem by using wait() & notify()methods to communicate between producer and consumer threads. The wait() method to pause the producer or consumer thread depending on the queue size. The notify() method sends a notification to the waiting thread.
+
+The Producer thread will keep on producing data for Consumer to consume. It will use wait() method when Queue is full and use notify() method to send notification to Consumer thread once data is added to the queue.
+
+The Consumer thread will consume the data form the queue. It will also use wait() method to wait if queue is empty. It will also use notify() method to send notification to producer thread after consuming data from the queue.
+
+
+A very typical application is message passing between applications which happens all the time in today's multi-processing operating systems.
+
+Consider the printing of documents. You can print from several applications, i.e. multiple producers can create printing "messages" that are enqueued by a printer spooler and later consumed by a printer. Many kinds of shared access to resources are producer consumer problems.
+
+In real-time critical applications with multi-tasking there also may be also some kind of events that are passed from one task to another which requires synchonization mechanisms to avoid race conditions, especially in event-triggered systems. For example, an embedded real-time system may receive a message from the producer, which one or multiple tasks (consumer) may be waiting for.
+
+Below is an example of a program that avoids the producer-consumer problem by using synchronization and the wait() and notify() thread methods. This example is of a cookie store that has a Baker (producer) and Cashier (consumer).
+
+Cookie class:
+
+public class Cookie {
+
+}
+Main class:
+
+import java.util.ArrayDeque;
+
+public class Main {
+  public static ArrayDeque<Cookie> cookies = new ArrayDeque<>();
+  public static final int MAX_COOKIES = 5;
+
+  public static void main(String[] args) {
+    // create producer and consumer
+    Baker baker = new Baker();
+    Cashier cashier = new Cashier();
+
+    // creates threads that produce and consume
+    Thread thread1 = new Thread(() -> {
+      try {
+        for(int i = 0; i < 5; i++) {
+           baker.produce(new Cookie());
+        }
+        
+      } catch (InterruptedException e) {
+        System.out.println("Producer interrupted!");
+      }
+    });
+
+    Thread thread2 = new Thread(() -> {
+      try {
+        for(int i = 0; i < 5; i++) {
+          cashier.consume();
+        }
+        
+      } catch (InterruptedException e) {
+        System.out.println("Consumer interrupted!");
+      }
+    });
+
+    // start threads
+    thread1.start();
+    thread2.start();
+  }
+}
+The Main class has a queue that contains cookies, and there is a maximum of 5 cookies that it can contain. When the program starts, it creates a Baker and Cashier. We then have two threads, one of which asks the Baker to make cookies 5 times, and the other asks the Cashier to take 5 cookies to sell.
+
+Baker class:
+
+import java.util.ArrayDeque;
+
+public class Baker {
+
+    ArrayDeque<Cookie> cookies = Main.cookies;
+
+    public void produce(Cookie cookie) throws InterruptedException {
+
+        synchronized(cookies) {
+
+            // check if baker can produce
+            while (cookies.size() == Main.MAX_COOKIES) {
+                // if not, wait
+                System.out.println("Baker waits!");
+                cookies.wait();
+            }
+
+
+            // if there is space on shelf, produce
+            cookies.add(cookie);
+            System.out.println("Baker baked a cookie!\n" + 
+            "Cookies currently ready for sale: " + cookies.size());
+            cookies.notify();
+
+        }
+    }
+}
+The Baker class will attempt to bake cookies. When its produce() method runs, it acquires a lock on the Main class's cookies object. It then checks if it can produce by checking the size of the cookies queue. If it can, it produces a cookie. If it can't, it uses the wait() method to release its lock and will only run if it has been notified by another thread that the cookies object is ready to be used again.
+
+Cashier class:
+
+import java.util.ArrayDeque;
+
+public class Cashier {
+    ArrayDeque<Cookie> cookies = Main.cookies;
+
+    public void consume() throws InterruptedException {
+
+        synchronized(cookies) {
+
+            // check if baker can produce
+            while (cookies.isEmpty()) {
+                // if not, wait
+                System.out.println("Cashier waits!");
+                cookies.wait();
+            }
+
+
+            // if there is space on shelf, produce
+            cookies.remove();
+            System.out.println("Cashier sold a cookie!\n" + 
+            "Cookies currently ready for sale: " + cookies.size());
+            cookies.notify();
+
+        }
+    }
+}
+The Cashier class will attempt to consume cookies. When its consume() method runs, it acquires a lock on the Main class's cookies object. It then checks if it can take a cookie by checking the size of the cookies queue. If it can, it consumes a cookie. If it can't, it uses the wait() method to release its lock and will only run if it has been notified by another thread that the cookies object is ready to be used again.
+
+Output:
+
+Cashier waits!
+Baker baked a cookie!
+Cookies currently ready for sale: 1
+Baker baked a cookie!
+Cookies currently ready for sale: 2
+Cashier sold a cookie!
+Cookies currently ready for sale: 1
+Cashier sold a cookie!
+Cookies currently ready for sale: 0
+Cashier waits!
+Baker baked a cookie!
+Cookies currently ready for sale: 1
+Cashier sold a cookie!
+Cookies currently ready for sale: 0
+Cashier waits!
+Baker baked a cookie!
+Cookies currently ready for sale: 1
+Cashier sold a cookie!
+Cookies currently ready for sale: 0
+Cashier waits!
+Baker baked a cookie!
+Cookies currently ready for sale: 1
+Cashier sold a cookie!
+Cookies currently ready for sale: 0
+

@@ -1,0 +1,102 @@
+Reflection in Java is a feature that allows a program to examine and manipulate its own structure, behavior, and metadata at runtime. It provides a way to inspect and modify classes, interfaces, fields, methods, and constructors, even if they are private or inaccessible through normal means. Reflection is particularly useful for building generic code, implementing frameworks, and writing debugging tools. The API can be found in the java.lang.reflect package.
+
+Using Reflection
+The java.lang.Class class represents classes and interfaces in Java. It provides methods to query information about a class, such as its name, superclass, implemented interfaces, fields, methods, and constructors. There are several ways to obtain a Class object:
+
+Using the .class syntax: Class<?> clazz = MyClass.class;
+Using the getClass() method: Class<?> clazz = obj.getClass();
+Using the Class.forName() method: Class<?> clazz = Class.forName("com.example.MyClass");
+Once you have a Class object, you can inspect its structure using methods such as getFields(), getMethods(), getConstructors(), getDeclaredFields(), getDeclaredMethods(), and getDeclaredConstructors(). These methods return arrays of Field, Method, or Constructor objects, which represent the fields, methods, and constructors of the class, respectively.
+
+The difference between methods that contain the word "declared" in the name and those that don't is that they only include members defined within the class itself, including private members. Methods that do not include the word "declared" include both inherited members and members defined within the class itself, except for private members.
+Just as there is a class that represents Class, there are classes that represent constructors, fields, and methods. These classes contain methods for accessing metadata about or using these class members.
+
+Resources
+Java documentation: https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/package-summary.html and https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html
+Java tutorial: https://docs.oracle.com/javase/tutorial/reflect/index.html
+Oracle article: https://www.oracle.com/technical-resources/articles/java/javareflection.html
+
+
+Knowing reflection in Java is important for several reasons:
+
+Introspection: Reflection enables you to inspect the structure and behavior of classes, interfaces, fields, methods, and constructors at runtime. This introspective capability is valuable for building frameworks, libraries, and tools that need to analyze or manipulate classes dynamically.
+Dependency Injection and IoC Containers: Many dependency injection frameworks and Inversion of Control (IoC) containers use reflection to inspect and wire dependencies at runtime. By using reflection, these frameworks can automatically instantiate and inject dependencies into objects based on their annotations or configuration.
+Testing and Debugging: Reflection can be helpful in testing and debugging scenarios where you need to access and modify private fields or invoke private methods for testing purposes. It enables you to inspect and manipulate the internal state of objects, which can be useful for writing unit tests or diagnosing issues in production environments.
+Annotations and Custom Annotations: Reflection is often used with annotations to process and interpret metadata associated with classes, fields, methods, and other program elements. It allows you to extract and analyze annotation metadata at runtime, enabling powerful runtime behavior based on annotations.
+Framework and Library Development: Reflection is frequently employed in the development of frameworks and libraries to provide flexible and extensible behavior. Frameworks can use reflection to dynamically discover and invoke extension points, configure components based on annotations or configuration files, and enforce runtime constraints or policies.
+Overall, understanding reflection in Java empowers developers to build more flexible, extensible, and dynamic applications by leveraging the power of introspection and runtime manipulation of classes and objects. While reflection can be a powerful tool, it should be used judiciously due to its potential performance overhead and the complexity it introduces to the codebase.
+
+
+When using the Reflection API, we use the following three steps:
+
+Obtain a Class object
+Get one or more of its class members
+Manipulate or use the class member
+Obtaining a Class Object
+Class<?> classObj = String.class;
+System.out.println(classObj);
+
+Class<?> classObj2 = Class.forName("java.lang.String");
+System.out.println(classObj2);
+
+Class<?> classObj3 = "hello world".getClass();
+System.out.println(classObj3);
+Output:
+
+class java.lang.String
+class java.lang.String
+class java.lang.String
+Above are three examples of obtaining the Class object for the String class. Note the use of wildcards in the generic parameters. The reason for this is for some of these examples, the return type may be uncertain or not exactly of the type we are expecting.
+
+Obtaining Class Members
+// step 1
+Class<?> classObj = Object.class;
+System.out.println(classObj + "\n");
+
+// step 2
+Member[] members = classObj.getDeclaredMethods();
+for (Member member : members) {
+   System.out.println(member);
+}
+In the above example, we obtain a Class object for the Object class, and then we get its methods and print them out to the console. Note that getDeclaredMethods() returns an array of objects of the type Member. This is the supertype for the Field, Method, and Constructor classes.
+
+The following code is the output:
+
+class java.lang.Object
+
+protected void java.lang.Object.finalize() throws java.lang.Throwable
+public final void java.lang.Object.wait(long,int) throws java.lang.InterruptedException
+public final void java.lang.Object.wait() throws java.lang.InterruptedException
+public final native void java.lang.Object.wait(long) throws java.lang.InterruptedException
+public boolean java.lang.Object.equals(java.lang.Object)
+public java.lang.String java.lang.Object.toString()
+public native int java.lang.Object.hashCode()
+public final native java.lang.Class java.lang.Object.getClass()
+protected native java.lang.Object java.lang.Object.clone() throws java.lang.CloneNotSupportedException
+public final native void java.lang.Object.notify()
+public final native void java.lang.Object.notifyAll()
+Using Class Members
+
+// step 3
+Method method = (Method) classObj.getDeclaredMethod("getClass");
+System.out.println(method);
+System.out.println(method.invoke("hello world"));
+If we continue with the previous example, we can use classObj to get a specific method with the name getClass and invoke it.
+
+The following code is the output:
+
+public final native java.lang.Class java.lang.Object.getClass()
+class java.lang.String
+Exercises (Optional)
+Normally it is up to the programmer to write a toString() method for each class one creates. This exercise is about writing a general toString() method once and for all. As part of the Reflection API for Java, it is possible to find out which fields exist for a given object, and to get their values. The purpose of this exercise is to make a toString() method that gives a printed representation of any object, in such a manner that all fields are printed, and references to other objects are handled as well.
+
+To solve the exercises, you will need to examine the java.lang.reflect API.
+
+Write a class ToString with one static method "String toString(Object o)". The first version should just return the name of the class the object is an instance of. Write another class, ToStringTest, which prints the result of calling "ToString.toString("Hans")".
+Extend the toString method. This time it should find out which fields exist in the object, and return a string of the format "classname{fieldName1, fieldName2,....,fieldNameN}". When this works, make sure you do not print out a superfluous comma just before the closing brace.
+Extend the toString method, so that each field is printed in the form "fieldName: fieldType".
+We do not want static fields to be included in the printout. Make sure no static fields are printed. Keep testing the method using the ToStringTest method.
+Extend the method to print out the values of each field using Java's built in toString method. The format for each field should now be "fieldName: fieldType = value". Note, the value of a private field can be read after you use the "setAccessible(true)" method that fields inherit from AccessibleObject.
+A field might be an Array. If it is, write each value in the array as "[val1, val2, val3,..., valN]". Optional extra. If the array has more than 15 elements, only the first 15 should be printed, and the rest should be printed as "...". Hint on retrieving values from an Array: Try looking at the documentation of the Array class in the API.
+
+

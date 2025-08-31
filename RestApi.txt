@@ -1,0 +1,149 @@
+
+Every developer who wants to build modern, robust web applications must understand how to consume
+APIs to fetch data into their applications. In this topic, you will learn how to consume
+RESTful APIs.
+
+If you've ever spent any time programming or researching programming, you've likely come across 
+the term "API." 
+API stands for Application Programming Interface. It is a medium that allows 
+different applications to communicate programmatically with one another and return a response
+in real time.
+
+
+When a request is made via a REST API, it sends a representation of the resource's current state
+to the requester or endpoint.
+
+This state representation can take the form of JSON (JavaScript Object Notation), XML, or HTML.
+
+JSON is the most widely used file format because it is language-independent and can be read by
+both humans and machines.
+
+Exposing Endpoints
+
+A REST resource is a piece of identifiable information that can be accessed through an API. Note that resources are not necessarily domain entities, although they usually appear to be so. 
+
+Exposing endpoints means that you enable information to be accessed through some means. 
+An endpoint is a combination of an action to perform and its associated resource.
+
+For example, in a RESTful API for managing a collection of books, exposing endpoints might involve
+defining resources such as /books which can be used to retrieve all books or to create a new book,
+or /books/{id} which can be used to retrieve, update, and delete a specific book by its ID.
+After defining those resources, you'll need to define routes or handlers.
+These are typically methods or functions that wait for an HTTP request to be routed to a specific
+endpoint. If a request is made, the method or function will execute. 
+The result of the execution should be a response that is sent back to the client or application 
+that made the request.
+
+Consuming endpoints
+Consuming endpoints involves sending requests to the exposed endpoints of another application or
+service to access its functionalities or resources. In other words, it's the process of making 
+HTTP requests to interact with an API and retrieve data or perform actions.
+
+To consume endpoints, you use HTTP client libraries or tools in your application to send requests
+to the specified URLs and handle the responses returned by the server.
+You typically specify the HTTP method (GET, POST, PUT, DELETE), along with any necessary request
+parameters or data, and process the response received from the server.
+
+
+In a client application (e.g., a web application, mobile app, or desktop application), consuming
+endpoints might involve sending GET requests to retrieve a list of books from a remote server,
+sending POST requests to create a new book, sending PUT requests to update an existing book,
+and sending DELETE requests to delete a book.
+
+
+
+Let's pretend we're building a REST API for a blog application.
+
+Exposing Endpoints
+Step 1: Identify Your Resources
+The first thing to do when building a REST API is to identify which resources will be defined by
+our application. These resources will allow users to interact with one or all blog posts:
+
+/posts: Represents a collection of blog posts.
+/posts/{id}: Represents a specific blog post.
+Next, let's define some endpoints we could expose to a client application.
+
+Step 2: Identify Your Endpoints
+These endpoints will allow the client to perform various actions such as creating, reading, 
+updating, and deleting blog posts:
+
+GET to /posts: Retrieve a list of all blog posts.
+GET to /posts/{id}: Retrieve details of a specific blog post by its ID.
+POST to /posts: Create a new blog post.
+PUT to /posts/{id}: Update an existing blog post by its ID.
+DELETE to /posts/{id}: Delete a blog post by its ID.
+We could also identify resources and endpoints for other entities in our application, like users
+or comments.
+
+Step 3: Implementation
+The implementation of a REST API will vary depending on the programming language and tool you are
+using. You'll most likely be using a web framework like Express for Node.js, Flask for Python, 
+or the Spring Framework for Java.
+
+Examples of routes/handlers for the GET to /posts endpoint:
+
+// JavaScript example using Express
+
+app.get('/posts', (req, res) => {
+  res.json(posts); 
+});
+# Python example using Flask
+
+@app.route('/posts', methods=['GET'])
+def get_posts():
+    return jsonify(posts)
+// Java example using Spring Boot
+
+@GetMapping("/posts")
+public List<Post> getPosts() {
+    return posts;
+}
+Consuming Endpoints
+The implementation of consuming endpoints from a REST API will also vary depending on the 
+programming language and tool you are using. For now, can pretend to use a simple command-line
+interface program, cURL. Let's say we want to send a GET request to the /books resources of our
+API. We can use the following command:
+
+curl https://notarealbooksite.com/books
+The result should be the response body and contains JSON data representing a list of books:
+
+{
+  "data":
+    {
+      "id": 1,
+      "title": "To Kill a Mockingbird",
+      "author": "Harper Lee",
+      "genre": "Fiction",
+      "year": 1960
+    },
+    {
+      "id": 2,
+      "title": "1984",
+      "author": "George Orwell",
+      "genre": "Dystopian",
+      "year": 1949
+    },
+    {
+      "id": 3,
+      "title": "The Great Gatsby",
+      "author": "F. Scott Fitzgerald",
+      "genre": "Classic",
+      "year": 1925
+    },
+    {
+      "id": 4,
+      "title": "To Kill a Mockingbird",
+      "author": "Harper Lee",
+      "genre": "Fiction",
+      "year": 1960
+    }
+}
+
+
+
+
+
+
+
+
+
