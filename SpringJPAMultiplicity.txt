@@ -1,0 +1,278 @@
+# Request Param
+In this lab you will learn how to interact with related entities using spring JPA.
+
+# Files to modify
+You should modify only the StudentService in the Service package.
+
+package Application.Model;
+
+import lombok.*;
+
+import javax.persistence.*;
+import java.util.List;
+
+/**
+ * This JPA Entity has been related with the Student entity via a @OneToMany annotation. The actual table
+ * this entity will be related to will contain a foreign key in the Student table that relates it to the Classroom
+ * table.
+ *
+ * You can also find the addition of (fetch = FetchType.EAGER) to the multiplicity mapping. This is an important
+ * concept. Spring has the choice of either retrieving entities related to this one together with this entity (eager
+ * fetching), or it may retrieve related entities only when they are specifically requested (lazy fetching). As you
+ * may guess, this makes Eager fetching optimized for retrieving many related entities repeatedly, and Lazy fetching
+ * optimized for retrieving only this single entity. The fetch type that you use in your application should be chosen
+ * carefully for maximal efficiency.
+ */
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode
+public class Classroom {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
+    private String room;
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "classroomFK")
+    private List<Student> students;
+
+    public Classroom(String room) {
+        this.room = room;
+    }
+
+    @Override
+    public String toString() {
+        return "Classroom{" +
+                "id=" + id +
+                ", room='" + room + '\'' +
+                '}';
+    }
+}
+
+package Application.Model;
+
+import lombok.*;
+
+import javax.persistence.*;
+/**
+ * This JPA Entity has been related with the Student entity via a @ManyToOne annotation. The actual table
+ * this entity will be related to will contain a foreign key in the Student table that relates it to the Classroom
+ * table.
+ *
+ * You can also find the addition of (fetch = FetchType.EAGER) to the multiplicity mapping. This is an important
+ * concept. Spring has the choice of either retrieving entities related to this one together with this entity (eager
+ * fetching), or it may retrieve related entities only when they are specifically requested (lazy fetching). As you
+ * may guess, this makes Eager fetching optimized for retrieving many related entities repeatedly, and Lazy fetching
+ * optimized for retrieving only this single entity. The fetch type that you use in your application should be chosen
+ * carefully for maximal efficiency.
+ */
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode
+public class Student {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
+    private String name;
+    private double grade;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "classroomFK")
+    private Classroom classroom;
+
+    public Student(String name, double grade) {
+        this.name = name;
+        this.grade = grade;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", grade=" + grade +
+                ", classroom=" + classroom +
+                '}';
+    }
+}
+
+package Application.Service;
+
+import Application.Model.Classroom;
+import Application.Model.Student;
+import Application.Repository.ClassroomRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * This service class will demonstrate how to retrieve or manipulate the entities related to the Classroom entity.
+ */
+@Service
+public class ClassroomService {
+    ClassroomRepository classroomRepository;
+    @Autowired
+    public ClassroomService(ClassroomRepository classroomRepository){
+        this.classroomRepository = classroomRepository;
+    }
+
+    /**
+     * Persist a new classroom.
+     * @param classroom a transient classroom entity.
+     * @return a persisted classroom entity.
+     */
+    public Classroom addClassroom(Classroom classroom){
+        return classroomRepository.save(classroom);
+    }
+    /**
+     * @return all persisted classroom entities.
+     */
+    public List<Classroom> getAllClassrooms(){
+        return classroomRepository.findAll();
+    }
+    /**
+     * Assign a student to a classroom while retrieving only the classroom entity.
+     * @param classroomId the Id of an already existing classroom entity.
+     * @param student an already persisted student entity.
+     */
+    public void addStudentToClassroom(long classroomId, Student student){
+        Optional<Classroom> classroomOptional = classroomRepository.findById(classroomId);
+        if(classroomOptional.isPresent()){
+            Classroom classroom = classroomOptional.get();
+            classroom.getStudents().add(student);
+            classroomRepository.save(classroom);
+        }
+    }
+    /**
+     * Get the students of a classroom while retrieving only the classroom entity.
+     * @param classroomId the Id of an already existing classroom entity.
+     * @return the persisted student entities
+     */
+    public List<Student> getStudentsOfClassroom(long classroomId){
+        Optional<Classroom> classroomOptional = classroomRepository.findById(classroomId);
+        if(classroomOptional.isPresent()){
+            Classroom classroom = classroomOptional.get();
+            return classroom.getStudents();
+        }
+        return null;
+    }
+    /**
+     * Unassign a student from a classroom while retrieving only the clasroom entity.
+     * @param classroomId the Id of an already existing classroom entity.
+     * @param studentId the Id of the student entity to be removed from a classroom.
+     * @return the persisted student entities
+     */
+    public void removeStudentFromClassroom(long classroomId, long studentId){
+        Optional<Classroom> classroomOptional = classroomRepository.findById(classroomId);
+        if(classroomOptional.isPresent()){
+            Classroom classroom = classroomOptional.get();
+//            lambda expression applied to the collection - this is the same as iterating through the student list
+//            and removing if(student.getId() == studentId)
+            classroom.getStudents().removeIf(student -> student.getId() == studentId);
+            classroomRepository.save(classroom);
+        }
+    }
+}
+
+package Application.Service;
+
+import Application.Model.Classroom;
+import Application.Model.Student;
+import Application.Repository.ClassroomRepository;
+import Application.Repository.StudentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * In this class, you will complete the code necessary to retrieve and manipulate entities related to the Student
+ * entity. You can check out the ClassroomService to see how this is done for another entity. You should also review
+ * the Classroom and Student classes themselves, as these two classes are related to each other in different ways
+ * (a list in a one to many against a single object in a many to one.)
+ */
+@Service
+public class StudentService {
+    StudentRepository studentRepository;
+    ClassroomRepository classroomRepository;
+    /**
+     * The StudentRepository has been autowired into this class via constructor injection. In case you would like
+     * to use or experiment with the ClassroomRepository as well, that bean will also be injected, however, using the
+     * ClassroomRepository is not required.
+     * @param studentRepository
+     * @param classroomRepository
+     */
+    @Autowired
+    public StudentService(StudentRepository studentRepository, ClassroomRepository classroomRepository){
+        this.studentRepository = studentRepository;
+        this.classroomRepository = classroomRepository;
+    }
+
+    /**
+     * Persist a new student entity.
+     * @param student a transient student entity.
+     * @return the persisted student entity.
+     */
+    public Student addStudent(Student student){
+        return studentRepository.save(student);
+    }
+
+    /**
+     * @return all student entities.
+     */
+    public List<Student> getAllStudent(){
+        return studentRepository.findAll();
+    }
+
+    /**
+     * TODO: Provided the Id of an already existing student entity, as well as an existing classroom entity,
+     * assign the classroom to the student by manipulating the classroom field of the student. Don't forget to save
+     * the changes made to your student entity via the studentRepository so that the update is sent to the database.
+     *
+     * @param studentId the id of a persisted student
+     * @param classroom a persisted, existing classroom passed into this method
+     */
+    public void assignClassroomToStudent(long studentId, Classroom classroom){
+        Optional<Student> optionalStudent = studentRepository.findById(studentId);
+        if (optionalStudent.isPresent()) {
+            Student student = optionalStudent.get();
+            student.setClassroom(classroom);
+            studentRepository.save(student);
+
+        }
+    }
+
+    /**
+     * TODO: Provided the Id of an already existing student entity, return its assigned classroom by retrieving
+     * the 'classroom' field of student. Don't forget to save the changes made to your student entity via the
+     * studentRepository so that the update is sent to the database.
+     * @param studentId Id of a persisted, existing student entity
+     * @return the Classroom of the student
+     */
+    public Classroom getClassroomOfStudent(long studentId){
+        Optional<Student> optionalStudent = studentRepository.findById(studentId);
+        return optionalStudent.map(Student::getClassroom).orElse(null);
+    }
+
+    /**
+     * TODO: Provided the Id of an already existing student entity, unassign its classroom by setting the student
+     * entity's classroom field to null. Don't forget to save the changes made to your student entity via the
+     * studentRepository so that the update is sent to the database.
+     * @param studentId Id of a persisted, existing student entity
+     */
+    public void unassignClassroomOfStudent(long studentId){
+        Optional<Student> optionalStudent = studentRepository.findById(studentId);
+        if (optionalStudent.isPresent()) {
+            Student student = optionalStudent.get();
+            student.setClassroom(null);
+            studentRepository.save(student);
+        }
+
+
+    }
+}

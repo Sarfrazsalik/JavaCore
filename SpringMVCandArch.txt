@@ -1,0 +1,69 @@
+MVC Architecture
+This is an architectural design pattern that is leveraged by multiple programming languages and
+frameworks as the basis for handling requests from users. Below are the basic components of the MVC architecture.
+
+Model: The component that deals with all the data-related logic or business logic.
+
+View: This component deals with the UI logic of the application.
+
+Controller: It is an interface between the Model and View. It is used to process business logic and incoming requests, manipulate data using the Model component and interact with views to give the final output.
+
+Spring MVC
+Spring MVC (Model-View-Controller) is a web framework provided by the Spring Framework for building web applications in Java which follows the MVC architectural pattern. In Spring MVC, the Model typically consists of POJOs (Plain Old Java Objects) or domain objects that represent the entities in the application domain. The View is typically implemented using template engines or another seperate application entirely, and controllers are implemented as classes annotated with @Controller or other stereotype annotations such as @RestController for creating RESTful web services.
+
+In scenarios where views are not needed, such as building RESTful web services or providing APIs for client-server communication, you can create controller methods that return data directly without involving views. These controller methods typically return data objects (e.g., domain objects, DTOs) serialized into the desired format (e.g., JSON, XML) using libraries like Jackson.
+
+Key Features
+Annotation-based Configuration: Spring MVC provides support for annotating controllers and mapping request URLs to controller methods using annotations such as @RequestMapping, @GetMapping, @PostMapping, etc. This allows for clean and concise configuration of request mappings.
+Data Binding and Validation: Spring MVC supports automatic data binding between HTTP request parameters and Java objects, as well as validation of form data using annotations.
+View Resolvers: Spring MVC supports view resolvers, which are responsible for resolving logical view names to actual View implementations. This allows for flexible and configurable rendering of views, supporting various view technologies such as JSP, Thymeleaf, FreeMarker, etc.
+Spring MVC also follows the Front Controller pattern. The Front Controller pattern is a design pattern commonly used in web applications to handle requests from clients and route them to the appropriate components for processing. In Spring MVC, the Front Controller is represented by the DispatcherServlet, which acts as the entry point for all incoming requests. When a request is received by the DispatcherServlet, it consults the request mappings configured in the application to determine which controller should handle the request. The DispatcherServlet then delegates the request to the corresponding controller for further processing.
+
+Example Flow of a Spring MVC Application
+SpringMVC Architecture
+
+The request from the client is sent to our Embedded Tomcat Server which sends the request to the DispatcherServlet (Front Controller).
+Based on the request, it is sent to a specific controller through the FrontController's delegation.
+The FrontController is aware of all the controllers annotated with the @Controller annotation.
+The response from the controller is a model, given back to the FrontController which then interacts with the view template to render a response to the User.
+The model can be either in raw data formats such as JSON, XML, etc. or utilizes view technologies such as JSP.
+In this architecture, as the DispatcherServlet(FrontController) handles all the requests and sends the response there is no direct interaction between the client and the controllers. As DispatcherServlet interacts with the view template, at any point in time the developer can change the view from JSP to thymeleaf or any other view template easily.
+
+
+The Model-View-Controller (MVC) architectural pattern plays a crucial role in web development for several reasons:
+
+Separation of Concerns: MVC promotes a clear separation of concerns by dividing an application into three distinct components: Model, View, and Controller. This separation allows developers to focus on different aspects of the application independently, making the codebase more modular, maintainable, and scalable.
+Modularity and Reusability: By separating the application into three components, MVC encourages modularity and reusability of code. Developers can reuse models, views, and controllers across different parts of the application or in other projects, leading to faster development cycles and reduced duplication of code.
+Scalability: MVC makes it easier to scale applications by isolating different components. For example, if the application experiences increased traffic, developers can scale the Controller layer to handle more requests without impacting the Model or View layers. Similarly, changes to one component (e.g., updating the business logic in the Model) can be made without affecting other components, allowing for easier maintenance and evolution of the application over time.
+Testability: MVC promotes testability by separating concerns and isolating components. Each component can be unit tested independently, allowing developers to write focused, targeted tests for models, views, and controllers. This makes it easier to verify the correctness of individual components and ensure the overall quality of the application.
+User Interface Design: MVC facilitates the design and development of user interfaces by separating presentation logic (View) from application logic (Model and Controller). Designers and frontend developers can focus on creating visually appealing and interactive user interfaces (views) without needing to understand or modify the underlying business logic (models and controllers).
+Flexibility and Adaptability: MVC provides flexibility and adaptability to changing requirements and technologies. Because each component is independent, developers can easily swap out or upgrade components without affecting the rest of the application. For example, it's possible to change the view layer from HTML-based views to a JavaScript-based frontend framework (e.g., Angular, React) without touching the backend logic.
+Overall, the MVC architectural pattern is essential for building robust, maintainable, and scalable web applications. It promotes best practices in software design, facilitates collaboration among developers, designers, and testers, and ultimately leads to better-quality software products.
+
+
+
+Example SpringMVC setup:
+
+We can add a dependency for Spring Boot to utilize Spring Web in the pom.xml file:
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+We can configure a Controller class with the appropriate @Controller annotation above the class definition. We can include a @RequestMapping annotation and @ResponseBody to the method signature as seen below for a simple HTTP GET Request.
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+@Controller
+public class TestController {
+    @RequestMapping(method = RequestMethod.GET)
+    public @ResponseBody String testRequest(){
+        return "Hello from the TestController";
+    }
+}
+Once above is completed, we can run our Spring Boot application and make the request to http://localhost:8080.
+NOTE: Be mindful if you've made any adjustments to your server.port number property in your application.properties/yaml.
+
+
+

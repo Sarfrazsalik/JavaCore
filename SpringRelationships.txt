@@ -1,0 +1,351 @@
+package Lab.Model;
+
+import lombok.*;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.*;
+import java.util.List;
+
+/**
+ * This is an ORM entity for an Album. This entity is incomplete, and you will have to specify the relationship
+ * this Entity will have with other entities. Albums ought to have a many-to-one relationship with artists (many albums
+ * may be created by one artist) and a one-to-many relationship with songs (one album may have many songs). Review the
+ * other provided entities, Artist and Song, to see examples of @OneToMany and @ManyToOne annotations in use.
+ */
+
+@Entity
+//For the sake of brevity, the following 4 annotations tell Lombok to generate boilerplate code at compile-time.
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class Album {
+    //The GeneratedValue annotation allows for Spring to automatically generate a unique ID.
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long albumId;
+    private String title;
+
+    /**
+     * Review the other model classes to see examples of annotations that link entities.
+     */
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "artist_fk")
+    private Artist artist;
+
+    /**
+     * Review the other model classes to see examples of annotations that link entities.
+     */
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "album", cascade = CascadeType.ALL)
+    private List<Song> songs;
+
+    public Album(String title) {
+        this.title = title;
+    }
+
+    /**
+     * A custom toString() is provided that avoids recursively serializing related entities.
+     */
+    @Override
+    public String toString() {
+        return "Album{" +
+                "albumId=" + albumId +
+                ", title='" + title + '\'' +
+                '}';
+    }
+}
+
+package Lab.Model;
+
+import lombok.*;
+
+import javax.persistence.*;
+import java.util.List;
+
+/**
+ * This is an ORM entity for an Artist. Artists have a one-to-many relationship with albums (one artist can produce
+ * many albums). This is reflected in the @OneToMany annotation. Spring Data JPA will associate these entities (and
+ * their database tables) with each other according to the specified relationship. This is done with foreign keys, but
+ * we are abstracted away from that behavior. If we wish to find the albums written by a particular artist, JPA will
+ * perform a join with the Album table to retrieve the artists. All that is needed to retrieve a List of the related
+ * albums is to call the method artist.getAlbums().
+ */
+@Entity
+//For the sake of brevity, the following 4 annotations tell Lombok to generate boilerplate code at compile-time.
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class Artist {
+    //The GeneratedValue annotation allows for Spring to automatically generate a unique ID.
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long artistId;
+    private String name;
+    /**
+     * There is one artist for many albums.
+     * They will be connected via a foreign key by the name "album_fk", belonging to the Album table.
+     * Spring will automatically perform the logic needed to join the Album and Artist table to get related albums.
+     */
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "artist_fk")
+    private List<Album> albums;
+
+    public Artist(String name) {
+        this.name = name;
+    }
+    /**
+     * A custom toString() is provided that avoids recursively serializing related entities.
+     */
+    @Override
+    public String toString() {
+        return "Artist{" +
+                "artistId=" + artistId +
+                ", name='" + name + '\'' +
+                '}';
+    }
+}
+
+
+package Lab.Model;
+
+import lombok.*;
+
+import javax.persistence.*;
+
+/**
+ * This is an ORM entity for a Song. Songs have a many-to-one relationship with albums (there are many songs in one
+ * album). This is reflected in the @ManyToOne annotation. Spring Data JPA will associate these entities (and their
+ * database tables) with each other according to the specified relationship. This is done with foreign keys, but
+ * we are abstracted away from that behavior. If we wish to find the album of a particular song, JPA will perform a
+ * join to retrieve the album data. All that is needed to retrieve the album data of any song is to call the method
+ * song.getAlbum().
+ */
+@Entity
+//For the sake of brevity, the following 4 annotations tell Lombok to generate boilerplate code at compile-time.
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class Song {
+    //The GeneratedValue annotation allows for Spring to automatically generate a unique ID.
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long songId;
+    private String title;
+    /**
+     * There is many songs for one album.
+     * They will be connected via a foreign key by the name "album_fk", belonging to the song table.
+     * Spring will automatically perform the logic needed to join the Song and Album tables to get related albums.
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "album_fk")
+    private Album album;
+
+    public Song(String title) {
+        this.title = title;
+    }
+    /**
+     * A custom toString() is provided that avoids recursively serializing related entities.
+     */
+    @Override
+    public String toString() {
+        return "Song{" +
+                "songId=" + songId +
+                ", title='" + title + '\'' +
+                '}';
+    }
+}
+
+package Lab.Service;
+
+import Lab.Model.Album;
+import Lab.Model.Song;
+import Lab.Repository.AlbumRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+/**
+ * Service class used to demonstrate ORM functionality for related entities.
+ * This leverages the stereotype annotation @Service, which is functionally the same as @Component.
+ * There is no need to modify anything in this class.
+ */
+@Service
+@Transactional
+public class AlbumService {
+
+    AlbumRepository albumRepository;
+
+    @Autowired
+    public AlbumService(AlbumRepository albumRepository){
+        this.albumRepository = albumRepository;
+    }
+
+    public Album addAlbum(Album album){
+        return albumRepository.save(album);
+    }
+    public List<Album> getAllAlbums(){
+        return albumRepository.findAll();
+    }
+
+    public Song addSongToAlbum(long albumId, Song song){
+        Album album = albumRepository.findById(albumId).get();
+        album.getSongs().add(song);
+        albumRepository.save(album);
+        return song;
+    }
+
+}
+
+package Lab.Service;
+
+import Lab.Model.Album;
+import Lab.Model.Artist;
+import Lab.Model.Song;
+import Lab.Repository.ArtistRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+/**
+ * Service class used to demonstrate ORM functionality for related entities.
+ * This leverages the stereotype annotation @Service, which is functionally the same as @Component.
+ * There is no need to modify anything in this class.
+ */
+@Service
+@Transactional
+public class ArtistService {
+
+    ArtistRepository artistRepository;
+
+    @Autowired
+    public ArtistService(ArtistRepository artistRepository){
+        this.artistRepository = artistRepository;
+    }
+
+    public Artist addArtist(Artist artist){
+        return artistRepository.save(artist);
+    }
+    public List<Artist> getAllArtists(){
+        return artistRepository.findAll();
+    }
+
+    public Artist addAlbumToArtist(long artistId, Album album){
+        Artist artist = artistRepository.findById(artistId).get();
+        artist.getAlbums().add(album);
+        artistRepository.save(artist);
+        return artist;
+    }
+
+}
+
+package Lab.Service;
+
+import Lab.Model.Album;
+import Lab.Model.Artist;
+import Lab.Model.Song;
+import Lab.Repository.SongRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+/**
+ * Service class used to demonstrate ORM functionality for related entities.
+ * This leverages the stereotype annotation @Service, which is functionally the same as @Component.
+ * There is no need to modify anything in this class.
+ */
+@Service
+@Transactional
+public class SongService {
+
+    SongRepository songRepository;
+
+    @Autowired
+    public SongService(SongRepository songRepository){
+        this.songRepository = songRepository;
+    }
+
+    public Song addSong(Song song){
+        return songRepository.save(song);
+    }
+    public List<Song> getAllSongs(){
+        return songRepository.findAll();
+    }
+
+
+}
+
+package Lab;
+
+import Lab.Model.Album;
+import Lab.Model.Artist;
+import Lab.Model.Song;
+import Lab.Service.AlbumService;
+import Lab.Service.ArtistService;
+import Lab.Service.SongService;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+
+@SpringBootApplication
+public class Application {
+    public static void main(String[] args) {
+        ApplicationContext applicationContext = SpringApplication.run(Application.class);
+
+        // get my beans
+        AlbumService albumService = applicationContext.getBean(AlbumService.class);
+        ArtistService artistService = applicationContext.getBean(ArtistService.class);
+        SongService songService = applicationContext.getBean(SongService.class);
+
+        // create some artists
+        Artist ar1 = artistService.addArtist(new Artist("artist 1"));
+        Artist ar2 = artistService.addArtist(new Artist("artist 2"));
+
+        // create some albums
+        Album al1 = albumService.addAlbum(new Album("album 1"));
+        Album al2 = albumService.addAlbum(new Album("album 2"));
+
+        // create some songs
+        Song s1 = songService.addSong(new Song("song 1"));
+        Song s2 = songService.addSong(new Song("song 2"));
+
+        // attach the songs to an album
+        albumService.addSongToAlbum(al1.getAlbumId(), s1);
+        albumService.addSongToAlbum(al1.getAlbumId(), s2);
+        System.out.println(songService.getAllSongs());
+        System.out.println(albumService.getAllAlbums());
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

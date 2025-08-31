@@ -1,0 +1,277 @@
+# SPR-CL-ENTITY
+
+This coding lab covers unit "Spring Data JPA", module "Spring Data Overview".
+
+## Instructions
+- This application shows how we can relate Models in our Spring Application to entities in our database.
+- Look out for TODO statements in Lab.Model.Product to see what needs to be added/changed.
+
+## Shouldn't Modify (But Look at for Context)
+- Lab.Application
+- Models
+    - Lab.Model.Sample
+- Lab.Repository.ProductRepository
+- Lab.Service.ProductService
+- Test files
+
+## Should Modify
+- Lab.Model.Product
+
+package Lab.Model;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import java.util.Objects;
+
+/**
+ * Spring uses Object Relational Mapping to provide an easy way to interact with the database. Most of the time,
+ * database tables directly match model classes used in Java. Therefore, it is possible to dynamically generate
+ * SQL statements based on the contents of an object. Object Relational Mapping will allow us to interact with
+ * the database by directly retrieving and manipulating special objects, called Entities, without the
+ * need to write SQL statements.
+ *
+ * In order to do that, this class will need to be marked as an Entity using the @Entity annotation. You will also
+ * need to mark a field, such as productID, with the @Id annotation to establish the primary key of the database
+ * table. All other fields of the class will automatically become columns of the database table.
+ *
+ * You may often see Hibernate mentioned in exceptions & documentations. Hibernate is the default "ORM provider"
+ * used in Spring Data.
+ *
+ * You can read Spring's documentation on Spring Data JPA & Entities here: https://spring.io/guides/gs/accessing-data-jpa/
+ */
+
+// @TODO - Add an annotation to indicate that this class is mapped to a relation in the database:
+@Entity
+public class Product {
+    // TODO - Add an annotation to indicate that this field is the primary key for the corresponding relation:
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long productID;
+    private String name;
+    private String description;
+
+    public Product(long productID, String name, String description) {
+        this.productID = productID;
+        this.name = name;
+        this.description = description;
+    }
+
+    public Product(){
+
+    }
+
+    public long getProductID() {
+        return productID;
+    }
+
+    public void setProductID(long productID) {
+        this.productID = productID;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /*
+    This will override the default equality check with a deep equivalency check.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Product product = (Product) o;
+        return productID == product.productID && Objects.equals(name, product.name) && Objects.equals(description, product.description);
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "productID=" + productID +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+    }
+}
+
+
+package Lab.Model;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+/**
+ * This is an example of what a valid ORM Entity would look like. The @Entity annotation informs Spring to relate this
+ * class to a database table. The @Id annotation establishes the primary key of the database table.
+ *
+ * No changes need to be made in this example. Product.java will need to modified to be an entity similar to this one.
+ */
+@Entity
+public class Sample {
+    @Id
+    private long sampleID;
+    private String text;
+
+    public Sample(long sampleID, String text) {
+        this.sampleID = sampleID;
+        this.text = text;
+    }
+
+    public Sample(){
+
+    }
+
+    public long getSampleID() {
+        return sampleID;
+    }
+
+    public void setSampleID(long sampleID) {
+        this.sampleID = sampleID;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+}
+
+package Lab.Repository;
+
+import Lab.Model.Product;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+/**
+ * This interface is a JPARepository. When Spring starts up, it will become a usable Bean which can perform basic
+ * database operations on our Product Entity, allowing us to save, delete, update, and query for Products from
+ * a Product table that directly resembles the Product Object in Java. Spring will manage the conversion between
+ * database records and Java Objects automatically through a process called Object Relational Mapping. The setup for
+ * that database is defined in the application.properties file in src/main/resources.
+ *
+ * We will look into how to work with the JPARepository in the future. First, let's configure our Entity in the Model
+ * folder. Take note of how the JPARepository takes in two generic types, the first the object used to model the
+ * Product data (Product) and the second being the type of the entity's Id (Long).
+ *
+ * There is no need to modify anything in this class. It also doesn't need to be marked as @Component or @Repository,
+ * as this is inherited from the JPARepository.
+ */
+public interface ProductRepository extends JpaRepository<Product, Long> {
+}
+
+
+package Lab.Service;
+
+import Lab.Model.Product;
+import Lab.Repository.ProductRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.transaction.Transactional;
+import java.sql.Connection;
+import java.util.List;
+
+/**
+ * This Service class demonstrates the basic use of the ProductRepository.
+ * There is no need to change anything in this class.
+ */
+@Component
+public class ProductService {
+    ProductRepository productRepository;
+    @Autowired
+    public ProductService(ProductRepository productRepository){
+        this.productRepository = productRepository;
+    }
+    /**
+     * This method will retrieve all Product entities from the Product database table, the equivalent
+     * of a "select * from product" statement.
+     * @return
+     */
+    public List<Product> getAllProducts(){
+        return productRepository.findAll();
+    }
+    /**
+     * This method will persist a product to the Product database table, the equivalent of a
+     * "insert into product" statement.
+     * @return
+     */
+    public Product insertProduct(Product product){
+        return productRepository.save(product);
+    }
+    /**
+     * This method will delete a product from the Product database table, the equivalent of a
+     * "delete from product" statement.
+     * @return
+     */
+    public void deleteProduct(Product product){
+        productRepository.delete(product);
+    }
+}
+
+
+package Lab;
+
+import Lab.Model.Product;
+import Lab.Service.ProductService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.autoconfigure.metrics.web.tomcat.TomcatMetricsAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+
+import javax.transaction.Transactional;
+import java.sql.SQLException;
+
+/**
+ * SpringBootApplication main class.
+ * There is no need to change anything in this class. Check out the Model class and Repository class for your tasks.
+ */
+@SpringBootApplication
+public class Application {
+    /**
+     * You can use the main method to check if the Spring app successfully starts. If you get a set of very
+     * long errors rather than this nicely formatted output, that most likely means that the Spring beans failed to
+     * load, because the JPARepository could not be initialized, because the Product entity was incorrectly set up.
+     * Spring errors tend to follow this long cascading pattern.
+     */
+    public static void main(String[] args){
+        ApplicationContext applicationContext = SpringApplication.run(Application.class);
+        ProductService productService = applicationContext.getBean(ProductService.class);
+        String output = "\n";
+        output+=("\nIf you're seeing this message, the database & entities were probably correctly set up.");
+        output+=("\nLet's try inserting some items.");
+        Product p1 = productService.insertProduct(new Product(1, "Headphones", "Nice headphones"));
+        Product p2 = productService.insertProduct(new Product(2, "Phone", "A smartphone"));
+        Product p3 = productService.insertProduct(new Product(3, "Swag", "Some other swag"));
+        output+=("\nLet's check the current contents of the Product table.");
+        output+=("\n"+productService.getAllProducts());
+        output+=("\nLet's see the contents of the Product table after I delete the product.");
+        productService.deleteProduct(p2);
+        output+=("\n"+productService.getAllProducts()+"\n");
+        SpringApplication.exit(applicationContext);
+//        I'm printing the output after the spring app finishes its closing logging messages.
+        System.out.println(output);
+    }
+}
+
+
+
