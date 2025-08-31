@@ -1,0 +1,98 @@
+Spring Data is an umbrella project within the larger Spring ecosystem that aims to simplify database access and persistence in Spring-based applications. It provides a unified and consistent programming model for working with various data access technologies, including relational databases, NoSQL databases, and other data stores.
+
+Here are some key aspects of Spring Data:
+
+Abstraction Layer: Spring Data provides a unified abstraction layer on top of different data access technologies. It abstracts away the complexities of interacting with various databases and data stores, allowing developers to focus on application-specific business logic rather than low-level database interactions.
+Repository Pattern: At the core of Spring Data is the Repository pattern, which provides a higher-level interface for interacting with data. Repositories encapsulate data access logic and provide methods for common CRUD (Create, Read, Update, Delete) operations as well as custom query methods.
+Automatic Query Generation: Spring Data repositories can automatically generate queries based on method names or custom query annotation such as @Query. This eliminates the need for writing boilerplate SQL or JPQL queries and simplifies the development process.
+Support for Various Data Stores: Spring Data supports a wide range of data stores, including relational databases (e.g., MySQL, PostgreSQL), NoSQL databases (e.g., MongoDB, Cassandra), key-value stores, document databases, and more. Each database technology is supported through a dedicated Spring Data module.
+
+
+Knowing how to use Spring Data is important for several reasons:
+
+Rapid Development: Spring Data provides a higher-level abstraction for interacting with databases, allowing developers to focus on business logic rather than boilerplate database code. This accelerates the development process and reduces time-to-market for applications.
+Consistency: Spring Data promotes consistency in data access across different parts of an application and among team members. By providing a unified programming model and best practices for data access, it helps maintain a consistent and cohesive codebase.
+Flexibility: Spring Data supports a wide range of data stores, including relational databases, NoSQL databases, and other data stores. This flexibility allows developers to choose the most suitable database technology for their application's requirements without having to learn new data access frameworks.
+Testability: Spring Data promotes testability by providing support for writing unit tests and integration tests for data access code. Developers can easily test repository methods, custom queries, and persistence logic using standard testing frameworks and techniques.
+Performance and Scalability: Spring Data offers features like caching, pagination, and lazy loading to optimize database performance and scalability. By leveraging these features, developers can build efficient and scalable applications that handle large volumes of data and concurrent users.
+
+
+Spring Data Commons provides all the common interfaces that are used to connect with different data stores.
+Crud Repository
+The key important interface in Spring Data Commons is the CrudRepository. It provides CRUD operations irrespective of databases. It extends Repository which is the base class for all the repositories providing access to databases.
+
+All the methods in the CrudRepository interface are listed below:
+
+public interface CrudRepository<T, ID> extends Repository<T, ID> {
+    <T1 extends T> T1 save(T1 entity);
+    <T1 extends T> Iterable<T1> saveAll(Iterable<T1> entities);
+    Optional<T> findById(ID id);
+    boolean existsById(ID id);
+    Iterable<T> findAll();
+    Iterable<T> findAllById(Iterable<ID> ids);
+    void deleteById(ID ids);
+    void delete(T entity);
+    void deleteAll(Iterable<? extends T> entities);
+    void deleteAll();
+}
+PagingAndSortingRepository
+The other interface in Spring Data is PagingAndSortingRepository. PagingAndSortingRepository provides options to Sort the data using the Sort interface and options to paginate using the Pageable interface, which provides methods for pagination getPageNumber(), next(), previousOrFirst() ,getPageSize()etc.
+
+public abstract interface PagingAndSortingRepository extends CrudRepository {
+public Iterable findAll(Sort s);
+public Page findAll(Pageable p);
+}
+Custom Repositories
+We can create a custom repository extending any of the repository classes like Repository, PagingAndSortingRepository, and CrudRepository. For example:
+
+interface StudentRepository extends CrudRepository<Student, Long> { }
+Spring Data Implementation
+The following are Spring Data Modules which are specific to the databases.
+
+Spring Data JPA: Connect to relational databases using ORM frameworks.
+Spring Data MongoDB: Repositories for MongoDB.
+Spring Data REST: Used for RESTful resources around Spring Data repositories.
+Spring Data JPA
+Spring Data JPA helps in connecting relational databases using ORM frameworks. The dependency we use:
+
+<dependencies>
+  <dependency>
+    <groupId>org.springframework.data</groupId>
+    <artifactId>spring-data-jpa</artifactId>
+  </dependency>
+<dependencies>
+public interface JpaRepository<T1, ID> 
+    extends PagingAndSortingRepository<T1, ID>, 
+            QueryByExampleExecutor<T1>
+            { }
+Some of the additional methods it provides are shown below.
+
+<T1 extends T> T1 saveAndFlush(T1 entity);
+void deleteInBatch(Iterable<T> entities);
+void deleteAllInBatch();
+Spring Data MongoDB
+Spring Data MongoDB provides support for using MongoDB as a database. The key interface is MongoRepository.
+
+public interface MongoRepository<T, ID> extends PagingAndSortingRepository<T, ID>, QueryByExampleExecutor<T> 
+{ }
+Some of the important methods are.
+
+    @Override
+    <T1 extends T> List<T1> findAll(Example<T1> example);
+    @Override
+    <T1 extends T> List<T1> findAll(Example<T1> example, Sort sort);
+Spring Data REST
+Spring Data REST can be used for REST web services that connect to Spring Data repositories An example using JPA is shown below.
+
+@RepositoryRestResource(collectionResourceRel = "example", path = "example")
+public interface ExampleRepository
+        extends PagingAndSortingRepository<Example, Long> {
+
+    List<Example> findByUser(@Param("user") String user);
+
+}
+example request is shown below:
+
+URL : http://localhost:8080/example?user=bob123
+
+

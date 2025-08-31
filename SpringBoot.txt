@@ -1,0 +1,161 @@
+Spring Boot is a powerful framework within the Spring ecosystem that simplifies the development of Java-based applications. It makes developing web applications and microservices with Spring Framework faster and easier through three core capabilities:
+
+Autoconfiguration.
+An opinionated approach to configuration.
+Additional features such as an embedded server and start packs.
+
+
+Autoconfiguration
+One of the key features of Spring Boot is its auto-configuration mechanism, which automatically configures beans and components based on the dependencies present in the classpath. We no longer need to write XML configuration as Spring Boot analyzes the environment and classpath to configure beans, reducing the need for manual configuration and improving productivity.
+
+Opinionated
+Spring Boot adopts an opinionated approach to configuration, providing sensible defaults and conventions for various aspects of application development. This allows developers to quickly bootstrap new projects and focus on writing business logic rather than spending time on boilerplate configuration.
+
+Additional Features
+Spring Boot comes with built-in support for embedded servers such as Tomcat, Jetty, and Undertow and it also provides a set of starter packs, which are curated sets of dependencies for common use cases such as web applications, data access, security, and messaging. Starter packs include all the necessary dependencies and configurations to get started with specific types of applications, making it easy to add functionality to projects without worrying about version compatibility or dependency conflicts.
+
+Spring Boot also seamlessly integrates with other components of the Spring ecosystem, such as Spring Framework, Spring Data, Spring Security, and Spring Cloud. This allows developers to leverage the full power of Spring ecosystem technologies and frameworks to build robust and feature-rich applications.
+
+Its simplicity, ease of use, and focus on convention over configuration make it a popular choice for building a wide range of applications, from simple REST APIs to complex microservices architectures.
+
+spring boot
+
+Comparison of the Spring Framework and Spring Boot
+Spring Framework	Spring Boot
+It is a comprehensive and modular framework for building enterprise Java applications	It is an opinionated framework built on top of the Spring Framework that aims to simplify and streamline the development of Spring-based applications
+It provides a wide range of features and functionalities for various aspects of application development	It includes embedded server support and seamless integration with the Spring ecosystem
+It requires developers to configure and manage many aspects of their applications manually	It is designed to be easy to use and quick to get started with because of auto-configuration
+The Spring Boot Flow
+spring
+
+
+Understanding Spring Boot is essential for modern Java developers due to several reasons:
+
+Rapid Application Development: Spring Boot simplifies the process of building Spring-based applications by providing a set of opinionated defaults and auto-configuration capabilities. Developers can quickly bootstrap new projects and focus on writing business logic instead of spending time on boilerplate configuration.
+Microservices Architecture: Spring Boot is well-suited for building microservices-based architectures, where applications are developed as a set of small, independently deployable services. Its lightweight nature, embedded server support, and seamless integration with Spring Cloud enable developers to create scalable and resilient microservices applications efficiently.
+Embedded Server Support: Spring Boot comes with embedded server support for popular web servers such as Tomcat, Jetty, and Undertow. This eliminates the need for manual server configuration and deployment, simplifying the deployment process and making it easier to run Spring applications as standalone executable JAR files.
+Auto-Configuration: Spring Boot's auto-configuration feature automatically configures beans and components based on the dependencies present in the classpath. This reduces configuration overhead and eliminates the need for explicit configuration in many cases, leading to cleaner and more concise code.
+Dependency Management: Spring Boot simplifies dependency management by providing a curated set of dependencies through starter packs. Starter packs include common libraries and configurations for specific use cases (e.g., web applications, data access, security), allowing developers to quickly add required dependencies to their projects without worrying about version conflicts or compatibility issues.
+In summary, understanding Spring Boot is crucial for modern Java developers looking to build scalable, maintainable, and cloud-native applications efficiently. Its simplicity, productivity features, embedded server support, and seamless integration with the Spring ecosystem make it a popular choice for building a wide range of Java-based applications.
+
+
+
+
+Below is an example that demonstrates how quickly we can set up an application with Spring Boot. The example can be found here: https://spring.io/guides/gs/spring-boot
+
+Create a Maven project and add the spring-boot-starter dependency to the pom.XML:
+<dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+      <version>3.2.5</version>
+  </dependency>
+
+Set Up Your Driver Class:
+import java.util.Arrays;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+
+@SpringBootApplication
+public class App 
+{
+    public static void main( String[] args )
+    {
+        SpringApplication.run(App.class, args);
+    }
+
+    @Bean
+    public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
+        return args -> {
+
+            System.out.println("Let's inspect the beans provided by Spring Boot:");
+
+            String[] beanNames = ctx.getBeanDefinitionNames();
+            Arrays.sort(beanNames);
+            for (String beanName : beanNames) {
+                System.out.println(beanName);
+            }
+
+        };
+    }
+}
+
+We can see the @SpringBootApplication annotation. This annotation tags the class as a source of bean definitions, enables auto-configuration, and tells the program to look for beans in other classes of the current package. The main() method uses Spring Boot’s SpringApplication.run() method to launch the application.
+
+There is also a CommandLineRunner method marked as a @Bean, and this runs on start up. It retrieves all the beans that were created by your application or that were automatically added by Spring Boot. It sorts them and prints them out.
+
+Output:
+
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.5)
+
+2024-04-30T09:36:38.608-05:00  INFO 9028 --- [           main] com.example.App                          : Starting App using Java 17.0.8.1 with PID 9028 (C:\Users\User\Desktop\demo\target\classes started by User in C:\Users\User\Desktop\demo)
+2024-04-30T09:36:38.618-05:00  INFO 9028 --- [           main] com.example.App                          : No active profile set, falling back to 1 default profile: "default"
+2024-04-30T09:36:40.693-05:00  INFO 9028 --- [           main] com.example.App                          : Started App in 3.011 seconds (process running for 4.229)
+Let's inspect the beans provided by Spring Boot:
+app
+applicationAvailability
+applicationTaskExecutor
+commandLineRunner
+fileWatcher
+forceAutoProxyCreatorToUseClassProxying
+lifecycleProcessor
+org.springframework.aop.config.internalAutoProxyCreator
+org.springframework.boot.autoconfigure.AutoConfigurationPackages
+org.springframework.boot.autoconfigure.aop.AopAutoConfiguration
+org.springframework.boot.autoconfigure.aop.AopAutoConfiguration$ClassProxyingConfiguration
+org.springframework.boot.autoconfigure.availability.ApplicationAvailabilityAutoConfiguration
+org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration
+org.springframework.boot.autoconfigure.context.LifecycleAutoConfiguration
+org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration
+org.springframework.boot.autoconfigure.info.ProjectInfoAutoConfiguration
+org.springframework.boot.autoconfigure.internalCachingMetadataReaderFactory
+org.springframework.boot.autoconfigure.sql.init.SqlInitializationAutoConfiguration
+org.springframework.boot.autoconfigure.ssl.SslAutoConfiguration
+org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration
+org.springframework.boot.autoconfigure.task.TaskExecutorConfigurations$SimpleAsyncTaskExecutorBuilderConfiguration
+org.springframework.boot.autoconfigure.task.TaskExecutorConfigurations$TaskExecutorBuilderConfiguration        
+org.springframework.boot.autoconfigure.task.TaskExecutorConfigurations$TaskExecutorConfiguration
+org.springframework.boot.autoconfigure.task.TaskExecutorConfigurations$ThreadPoolTaskExecutorBuilderConfiguration
+org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration
+org.springframework.boot.autoconfigure.task.TaskSchedulingConfigurations$SimpleAsyncTaskSchedulerBuilderConfiguration
+org.springframework.boot.autoconfigure.task.TaskSchedulingConfigurations$TaskSchedulerBuilderConfiguration
+org.springframework.boot.autoconfigure.task.TaskSchedulingConfigurations$ThreadPoolTaskSchedulerBuilderConfiguration
+org.springframework.boot.context.internalConfigurationPropertiesBinder
+org.springframework.boot.context.properties.BoundConfigurationProperties
+org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor
+org.springframework.boot.context.properties.EnableConfigurationPropertiesRegistrar.methodValidationExcludeFilter
+org.springframework.boot.sql.init.dependency.DatabaseInitializationDependencyConfigurer$DependsOnDatabaseInitializationPostProcessor
+org.springframework.context.annotation.internalAutowiredAnnotationProcessor
+org.springframework.context.annotation.internalCommonAnnotationProcessor
+org.springframework.context.annotation.internalConfigurationAnnotationProcessor
+org.springframework.context.event.internalEventListenerFactory
+org.springframework.context.event.internalEventListenerProcessor
+propertySourcesPlaceholderConfigurer
+simpleAsyncTaskExecutorBuilder
+simpleAsyncTaskSchedulerBuilder
+spring.info-org.springframework.boot.autoconfigure.info.ProjectInfoProperties
+spring.lifecycle-org.springframework.boot.autoconfigure.context.LifecycleProperties
+spring.sql.init-org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties
+spring.ssl-org.springframework.boot.autoconfigure.ssl.SslProperties
+spring.task.execution-org.springframework.boot.autoconfigure.task.TaskExecutionProperties
+spring.task.scheduling-org.springframework.boot.autoconfigure.task.TaskSchedulingProperties
+sslBundleRegistry
+sslPropertiesSslBundleRegistrar
+taskExecutorBuilder
+taskSchedulerBuilder
+threadPoolTaskExecutorBuilder
+threadPoolTaskSchedulerBuilder
+
+As we can see, our application already has a lot of autoconfiguration created for us.
+
+

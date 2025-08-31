@@ -1,0 +1,57 @@
+Spring Boot Actuator is a sub-project of the Spring Boot Framework that aims to assist you in monitoring and managing your application when it's pushed to production.
+
+Key Features
+End Points: Actuator provides several built-in endpoints (such as /health, /info, /metrics, etc.) for various monitoring purposes. Each one provides different insights into the application.
+
+Health Check: It provides detailed health information about the application. This is beneficial in determining whether or not the application is running as expected.
+
+Metrics Gathering: It collects and provides various metrics about the application, such as memory usage, garbage collection, web request statistics, and many more. These can be used to identify potential issues or bottlenecks.
+
+Application Info: Provides detailed information about the application, such as version number, Git commit ID, and others.
+
+Loggers: Actuator provides the ability to view and modify the log level of your application in real-time.
+
+Auditing: It automatically audits events in your application and accesses it through the /auditevents endpoint.
+
+HTTP Tracing: Provides trace information about the last 100 HTTP request-response exchanges via /trace endpoint.
+
+Security
+Actuator endpoints expose sensitive information of your application, so it’s always recommended to secure your Actuator endpoints.
+
+Spring Boot Actuator is an essential tool for monitoring and managing Spring Boot applications, making it a must-have tool for any serious Spring Boot developer.
+
+
+Here are some real-world applications of Spring Boot Actuator:
+
+Continuous Monitoring: Operations teams can continuously monitor the health of the application to identify any issues or failures quickly.
+Integration with Monitoring Tools: Health checks provided by Spring Boot Actuator can be integrated with external monitoring tools like Prometheus, Grafana, or Datadog for comprehensive monitoring and alerting.
+Performance Optimization: Developers can use metrics to identify performance bottlenecks and optimize critical parts of the application.
+Capacity Planning: Operations teams can use metrics to plan for capacity upgrades based on trends in resource usage over time.
+Debugging and Troubleshooting: Developers and operations teams can use logging endpoints to troubleshoot issues and debug problems in production.
+Compliance and Security: Audit endpoints provide insights into application security and compliance by tracking changes and access to sensitive data.
+Configuration Management: Operations teams can use environment information to manage application configurations dynamically without redeploying the application.
+Troubleshooting Configuration Issues: Developers can use environment information to troubleshoot configuration-related issues in production environments.
+Business-specific Monitoring: Developers can create custom endpoints to monitor business-specific metrics or gather domain-specific insights.
+Operational Tasks: Operations teams can create custom endpoints to perform operational tasks such as cache eviction, database cleanup, or system diagnostics.
+
+This is an example of setting up Spring Boot Actuator in a Spring Boot application and monitoring its basic endpoints. Let's say we have a Spring Boot project that has includes Spring Web and Spring Boot Actuator as dependencies.
+
+Step 1: Enable Actuator Endpoints
+Spring Boot Actuator endpoints are secured by default. To enable the endpoints, we need to add the following configuration to the application.properties file:
+
+management.endpoints.web.exposure.include=*
+This configuration will expose all actuator endpoints. However, exposing all endpoints can pose a security risk, as some of them can reveal sensitive information. For the sake of this example and testing purposes, we're exposing all, but in a production application, you should expose only necessary endpoints.
+
+Step 2: Access the Actuator Endpoints
+Once the application is running, we can access the Actuator endpoints from the web browser or using a tool like Postman or curl.
+
+The most basic endpoint is the /health endpoint, which shows the health status of the application. We can access it at:
+
+http://localhost:8080/actuator/health
+We should see a response similar to the following:
+
+{
+  "status": "UP"
+}
+Congratulations! We've successfully set up and tested a basic Spring Boot Actuator endpoint in your application. Remember that these endpoints are typically secured when deploying an application to a production environment.
+

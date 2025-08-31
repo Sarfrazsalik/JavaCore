@@ -1,0 +1,91 @@
+Dependency Injection (DI) in Spring can be categorized into three types: Constructor Injection, Setter Injection, and Field Injection.
+
+Constructor Injection
+What it is: This form of Dependency Injection is accomplished when a class receives its dependencies through its constructor during the instantiation process.
+Advantages: It allows for the creation of immutable objects because once a constructor is used to set a dependency, the field can be made final. This type of injection is also less prone to null pointer exceptions.
+Disadvantages: The class could end up with a large number of constructor arguments if there are many dependencies, which can make the code difficult to understand.
+Best used when: The dependencies are required for the class to function and should not be changed after the class is constructed.
+Setter Injection
+What it is: This type of Dependency Injection happens when a class receives its dependencies through setter methods after it has been constructed.
+Advantages: It provides a way to change the dependencies of a class after it has been constructed. It also makes it easier to handle optional dependencies.
+Disadvantages: The object is not guaranteed to be in a fully initialized state because it might not have received all its dependencies.
+Best used when: The dependencies can be changed during the lifespan of the class or when some dependencies are optional.
+Field Injection
+What it is: Field Injection happens when the dependencies are injected directly into the fields of a class, bypassing the constructor or setters.
+Advantages: It reduces the amount of boilerplate code, as no explicit setter or constructor is needed.
+Disadvantages: It makes your classes harder to test because you can't easily replace the dependencies with mocks. It also breaks encapsulation because you're modifying private fields outside the class.
+Best used when: You need to reduce the amount of boilerplate code and you are not concerned about the testing implications.
+
+Let's explore the real-world applications of the different types of Dependency Injection (DI) in Spring:
+
+Constructor Injection
+Large-scale enterprise applications: In large applications where various services are interacting with each other, constructor injection ensures all dependencies are present at the time of object creation, making the application more stable and less prone to null pointer exceptions.
+
+Immutable Objects: Constructor injection is useful in scenarios where you want your injected dependencies to be immutable (i.e., they can't be changed after being set). This is helpful in maintaining data consistency and integrity across the application.
+
+Mandatory Dependencies: Whenever an object has mandatory dependencies (dependencies it cannot function without), constructor injection is preferred.
+
+Setter Injection
+Configurable Components: Setter injection is useful in scenarios where you want to provide the option for dependencies to be reconfigured even after an object has been created. This is common in applications that have plugable or interchangeable components.
+
+Optional Dependencies: In cases where an object can function without certain dependencies, or where default dependencies can be overridden, setter injection is often used.
+
+Field Injection
+Simplifying Code with Spring Annotations: Field injection is commonly used in scenarios where you want to reduce boilerplate code. By directly injecting dependencies into fields with Spring's @Autowired annotation, the need for explicit setter or constructor methods is eliminated.
+
+Rapid Prototyping and Development: Field injection can speed up development time as it requires less code. This makes it a good choice for prototyping or when speed of development is a priority over other considerations such as testability.
+
+
+
+Understanding the theoretical concepts of Dependency Injection (DI) types is useful, but let's look at how to implement them. Here are some examples for each type of DI:
+
+Constructor Injection
+Constructor injection is commonly used in scenarios where the injected dependencies are required for the class to function, and those dependencies shouldn't change during the lifespan of the class. Let's look at an example using a PaymentService class:
+
+@Service
+public class PaymentService {
+    private final BankService bankService;
+
+    public PaymentService(BankService bankService) {
+        this.bankService = bankService;
+    }
+
+    public void makePayment(double amount) {
+        bankService.transferFunds(amount);
+    }
+}
+Here, PaymentService requires BankService to function and cannot change BankService after it has been constructed.
+
+Setter Injection
+Setter injection is often used when you need to provide the ability to change dependencies after an object has been constructed, or when a dependency is optional. Let's see an example with a NotificationService class:
+
+@Service
+public class NotificationService {
+    private EmailService emailService;
+
+    public void setEmailService(EmailService emailService) {
+        this.emailService = emailService;
+    }
+
+    public void sendNotification(String message) {
+        if(emailService != null) {
+            emailService.sendEmail(message);
+        }
+    }
+}
+Here, NotificationService has an optional dependency on EmailService. The EmailService can be changed at any time using the setEmailService method.
+
+Field Injection
+Field Injection is typically used in scenarios where you want to reduce the amount of boilerplate code. An example of this is when using Spring's @Autowired annotation:
+
+@Service
+public class ProductService {
+    @Autowired
+    private ProductRepository productRepository;
+
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
+}
+In this example, the ProductRepository dependency is directly injected into the ProductService class. No constructor or setter methods are required. However, this method of injection can make testing harder as it's more difficult to replace ProductRepository with a mock for testing.
+

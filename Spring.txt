@@ -1,0 +1,99 @@
+Introduction to Spring Framework
+The Spring Framework is a Java platform that provides infrastructure support to develop Java
+applications.
+
+As a developer, the process of handling business logic is important when compared to managing the
+infrastructure. With Spring a developer can focus on the application and Spring manages the 
+infrastructure.
+
+Spring helps to build applications using "plain old java objects" (POJOs) and to apply enterprise
+services non-invasively to POJOs.
+
+Advantages of Spring Framework
+
+Use of POJO: Spring framework helps developers to develop enterprise applications using POJO. An
+enterprise container like an application server is not required while using POJOs.
+
+Flexibility for configuring Spring: Spring provides both XML configuration and Java-based 
+annotations.
+No need for Server: Spring framework provides a lightweight container and it can be activated 
+without any web server or application server.
+No need for reinvention: Spring uses technologies such as JDK timers, ORM frameworks, Java EE, 
+etc. So developers need not have to learn all those technologies or frameworks to develop 
+applications.
+Modularity: Spring framework provides modularity. The developers can decide which packages can be
+used or ignored based on the requirements.
+Ease of Testability: Spring Dependency Injection simplifies the injection of test data by using 
+JavaBean POJO.
+Inversion Control and APIs: Spring framework provides inversion control and APIs to translate 
+exceptions thrown by JDBC and Hibernate into unchecked and consistent.
+
+Modules of Spring Framework
+Features of the spring framework are organized into 20 modules.
+
+The Spring modules are grouped into Core Container, Data Access/Integration, Web, AOP
+(Aspect Oriented Programming), Instrumentation, and Test, as shown in the following diagram.
+
+Spring Core Module
+Spring Core follows the principle of Inversion of Control, where the control of object creation 
+and lifecycle management is shifted from the application code to the Spring container. The Spring
+Core module provides the Inversion of Control (IoC) container. This container manages the 
+creation and configuration of objects (beans) in a Spring application. The Spring Container can 
+be implemented in two different ways namely, BeanFactory and ApplicationContext.
+
+This module also provides functionality for managing the lifecycle of a bean and for configuring
+your application, either with XML configuration or through annotations.
+
+Knowing Spring Core is crucial for effectively using the Spring Framework to build enterprise 
+Java applications. Here are some reasons why understanding Spring Core is important:
+
+Dependency Injection (DI): Spring Core implements a powerful dependency injection container that 
+manages object creation and wiring of components. Understanding DI enables developers to write 
+loosely coupled and easily maintainable code by decoupling dependencies and promoting 
+modularization.
+
+Inversion of Control (IoC): Spring Core follows the principle of Inversion of Control, where the
+control of object creation and lifecycle management is shifted from the application code to the
+Spring container. This leads to more flexible and modular application design, making it easier 
+to manage and extend.
+
+Bean Lifecycle Management: Spring Core provides mechanisms for managing the lifecycle of beans, 
+including instantiation, initialization, and destruction. Knowing how to configure bean lifecycle
+callbacks allows developers to perform custom initialization and cleanup tasks when beans are 
+created or destroyed.
+
+Annotations and XML Configuration: Spring Core allows developers to configure beans and 
+application contexts using annotations or XML-based configuration. Knowing how to use annotations
+and XML configuration provides flexibility and choice in configuring Spring applications 
+according to project requirements and preferences.
+
+The Spring Core, beans and context dependencies can be added to a Maven project:
+
+<!-- https://mvnrepository.com/artifact/org.springframework/spring-core -->
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-core</artifactId>
+    <version>5.3.23</version>
+</dependency>
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-beans</artifactId>
+    <version>5.3.23</version>
+</dependency>
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-context</artifactId>
+    <version>5.3.23</version>
+</dependency>
+<dependency>
+An XML file can be created for Spring configuration.
+
+Spring Configuration is done by adding the following code to the XML file. It can be obtained from Spring documentation.
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- add your beans here -->
+</beans>
