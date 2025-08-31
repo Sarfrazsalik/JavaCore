@@ -1,0 +1,321 @@
+SQL constraints are used to help validate data beyond just a simple data type. Below is a set of commonly used SQL constraints.
+
+Constraint	                         Use
+Not Null	           Ensures that a column's value is not null.
+Unique	               Ensures that a column's value is unique in the table.
+Primary Key            Combines unique and not null. Uniquely identifies each row.
+Foreign Key	           Links to a row in another table. Prevents the destruction of those links.
+Default	               Specifies a value for a column, if one is not given.
+Check	               Ensures the value of a column satisfies a specific condition.
+
+
+Although it is possible to define both NOT NULL and DEFAULT constraints for a column, 
+they serve distinct purposes. 
+The DEFAULT constraint provides a fallback value when no explicit value is provided,
+while NOT NULL ensures that NULL values are never inserted. 
+Using both together ensures that the column always contains a valid value.
+
+
+DEFAULT with a CHECK constraint might lead to conflicting requirements.
+
+
+Since a FOREIGN KEY constraint establishes a relationship between two tables based on the values
+of a column in both tables, using a CHECK constraint to enforce similar conditions is 
+redundant(Not so needed).
+
+Lastly, a PRIMARY KEY constraint implies that a column (or a set of columns) is both UNIQUE and
+NOT NULL . Therefore, explicitly adding a UNIQUE constraint to the same column is redundant.
+
+Constraints are used to define a database schema and are the backbone for defining 
+integrity constraints of the schema. Integrity constraints are rules or conditions defined on a
+database schema to maintain the accuracy, consistency, and reliability of data within a database.
+Integrity constraints collectively help maintain the quality and reliability of data in a 
+database, preventing errors, inconsistencies, and ensuring that data remains meaningful for 
+the applications and users interacting with the database. 
+
+
+
+
+
+AUTO INCREMENT allows a unique number to be generated automatically when a new row is inserted
+into a table.
+SERIAL is used to create an auto-incrementing integer column.
+
+Most often, AUTO INCREMENT or SERIAL acts as a primary key field that we would like to be 
+created automatically every time a new record is inserted.
+
+
+CREATE TABLE table_name(
+variable_name variable_datatype AUTO_INCREMENT
+);
+Example:
+
+CREATE TABLE employees (
+    employee_id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_name VARCHAR(50),
+    department_id INT
+);
+This same table written using SERIAL would look as follows:
+
+CREATE TABLE table_name (
+    variable_name SERIAL PRIMARY KEY,
+    -- Other columns...
+);
+Example:
+
+CREATE TABLE employees (
+    employee_id SERIAL PRIMARY KEY,
+    employee_name VARCHAR(50),
+    department_id INT
+);
+
+The CHECK constraint is used to limit the range value that can be placed in a column.
+It determines whether the value associated with the column is valid or not with the given criteria.
+It helps to check what type of values are to be stored in a table's column.
+
+CREATE TABLE FishTank (
+   FishID INT PRIMARY KEY,
+   Species VARCHAR(50),
+-- Ensure tank size is positive and not too large
+   TankSize DECIMAL CHECK (TankSize > 0 AND TankSize <= 100), 
+-- Ensure temperature is within a reasonable range
+   Temperature DECIMAL CHECK (Temperature >= 0 AND Temperature <= 30)
+);  
+
+DEFAULT keyword in SQL can include scenarios where you want to ensure that a certain column 
+always has a value, even if it's not explicitly provided during data insertion. This can be
+useful for maintaining data consistency and handling cases where certain information may be 
+missing but can be assumed or assigned a default value. 
+
+The DEFAULT constraint is made use of to set a default value for a column.
+
+The DEFAULT value will be added to all new records, if no other value is specified.
+
+The DEFAULT values are typically literal constants, there's an important exception for 
+timestamp and datetime columns. Many database systems allow the use of functions like now(), 
+CURRENT_TIMESTAMP, or similar to set the default value to the current time for these specific 
+column types. This is a commonly used feature and an exception to the general 'literal constant'
+rule.
+Use ALTER TABLE table_name ALTER COLUMN col_name SET DEFAULT to create a DEFAULT constraint to an existing column of a table.
+Use ALTER TABLE table_name ALTER COLUMN col_name DROP DEFAULT to delete a DEFAULT constraint from an existing column of a table.
+
+
+CREATE TABLE UserOnline (
+    ID INT PRIMARY KEY,
+    UserName VARCHAR(25),
+    Online BOOLEAN DEFAULT false
+);
+-- Inserting a user with online status not specified (defaults to false)
+INSERT INTO UserOnline (ID, UserName) VALUES (1, 'LemonadeStandBoss');
+
+-- Inserting a user with online status explicitly set to true
+INSERT INTO UserOnline (ID, UserName, Online) VALUES (2, 'CodeLikeABoss', true);
+
+In this example, the first user record inserted (“LemonadeStandBoss”) would have a value of
+‘false’ for the column ‘Online’, since no value was provided.
+
+Note that some SQL dialects may use the keyword DEFAULT as well within the insert statement.
+
+A primary key is a constraint that we can add to a column that labels that column as the unique 
+identifier for a record in the table.
+ 
+Primary Keys are `UNIQUE` and `NOT NULL` implicitly.
+ 
+There are 3 types of Primary Keys:
+- `Surrogate Key`: The primary key is autogenerated by the database (this is the type of primary
+   key we will be working with).
+- `Natural Key`: The primary key is naturally generated by the outside world.
+- `Composite Key`: They combination of 2 or more columns generates a unique identifier which you
+  can utilize as the primary key.
+
+
+
+Referential integrity is the relationship between tables. Each table in a database has a 
+primary key and this primary key can appear in other tables because of its relationship to 
+data within other tables. When a primary key from one table appears in another table, it is
+called a foreign key.
+Referential integrity does not allow the addition of any record in a table that contains the
+foreign key unless the reference table contains a corresponding primary key.
+
+Referential integrity does not allow deletion of a record in a table that contains the foreign
+key. To delete the record in the parent table, the corresponding record in the child table 
+should be deleted first. To solve this issue ON DELETE CASCADE is used.
+
+Other options are to set the foreign key to null or to its default value 
+(only if the default value references an existing value in the primary-key table).
+
+
+step 1: Create a table named Student.
+
+ CREATE TABLE Student(
+    student_id INT PRIMARY KEY,
+    first_name VARCHAR(20),
+    last_name VARCHAR(20),
+    Major VARCHAR(20)
+    );
+
+Step 2: create a table named InternationalStudent.
+
+CREATE TABLE InternationalStudent(
+    country_id INT PRIMARY KEY,
+    name VARCHAR(20),
+    student_id INT,
+    FOREIGN KEY(student_id) REFERENCES Student(student_id)
+    ON DELETE CASCADE /*Deletes the referencing row in the child table if the referenced row
+     in the parent table is deleted*/
+);
+Step 3: Insert values into Student table and InternationalStudent table.
+
+INSERT INTO Student VALUES(1,"Taylor", "Swift","English Literature");
+INSERT INTO Student VALUES(2,"Stephen", "Hawking","Physics");
+INSERT INTO InternationalStudent VALUES(1,"USA",1);
+INSERT INTO InternationalStudent VALUES(2,"UK",2);
+SELECT * FROM InternationalStudent;
+Result:
+
+country_id	name	student_id
+1	          USA	  1
+2	          UK	  2
+Step 4: delete a record from Student table
+
+DELETE FROM Student WHERE Major="English Literature";
+Now the record in child table InternationalStudent with student_id as 1 is deleted.
+
+SELECT * FROM InternationalStudent;
+Result:
+
+country_id	name	student_id
+2	         UK     	2
+
+
+Foreign keys are used to link tables together, and to enforce referential integrity.
+
+A Foreign key is used to connect two or more tables so that data from both can be put to use in 
+parallel.
+
+A foreign key is a field or collection of fields in a table that refers to the Primary key of
+the other table. It is responsible for managing the relationship between the tables.
+
+The table which contains the foreign key is called the child table, and the table whose
+primary key is being referred by the foreign key is called the Parent Table.
+
+CASCADE
+In SQL, CASCADE is a keyword used to simultaneous delete or update data from both the child 
+and parent tables and is used in conjunction while writing the query with ON DELETE or ON UPDATE.
+
+CASCADE is appended to the reference command for the foreign key when creating a table.
+
+
+CREATE TABLE students(
+    student_id INT PRIMARY KEY,
+    student_name VARCHAR(40),
+    email VARCHAR(20) UNIQUE
+);
+Define the table for courses
+CREATE TABLE courses(
+    course_id INT PRIMARY KEY,
+    course_name VARCHAR(20),
+    course_length_weeks INT,
+    credits INT
+);
+Finally, lets define a junction table to handle enrollment and uses CASCADE
+for the purposes of this example we will assume that courses never get updated
+CREATE TABLE enrollments(
+    course_id INT,
+    student_id INT,
+    grade INT,
+    completion_status boolean,
+    PRIMARY KEY(course_id, student_id),
+    FOREIGN KEY(course_id) REFERENCES courses(course_id) ON DELETE CASCADE
+    FOREIGN KEY(student_id) REFERENCES students(student_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+UNIQUE 
+The UNIQUE constraint is used to ensure every value of a column is different. This means that
+each row must have a distinct value in the specified column.
+
+A UNIQUE key allows for NULL column values for records.
+
+There is often confusion around how many NULL values a UNIQUE constraint can have in a column.
+Each database may have slight differences in the amount of NULL values that are allowed with a
+UNIQUE constraint. Some database systems only allow a single NULL value; however, databases 
+often allow multiple NULL values.
+
+The UNIQUE constraint ensures that all values in the column are distinct. However, 
+in most databases, UNIQUE does not prevent multiple NULL values since NULL is treated as an
+unknown value. To ensure that no NULL values exist in a column, use the NOT NULL constraint 
+in combination with UNIQUE.
+
+
+-- Create a table with a UNIQUE constraint allowing NULL values
+CREATE TABLE students (
+    studentId INT UNIQUE,
+    firstName VARCHAR(255),
+    lastName VARCHAR(255)
+);
+
+candidate key
+A candidate key is a column or a combination of columns that uniquely identifies each row in a
+table.
+Any table can have only one primary key so all the candidate keys other than the primary key 
+are secondary keys or alternate keys.
+A secondary key and the foreign key are NOT related or the same.
+
+CREATE TABLE Product (
+    ProductID INT PRIMARY KEY,
+    Barcode VARCHAR(20) UNIQUE,
+    Name VARCHAR(100),
+    Description TEXT,
+    Price DECIMAL(10, 2)
+);
+
+In this example:
+
+ProductID is the primary key of the table.
+Barcode is a candidate key since the column is marked as UNIQUE, ensuring each value in that column is unique.
+
+Composite Key
+
+Composite key is a combination of columns used to uniquely identify a table.
+A composite key can also be a combination of candidate keys.
+A group of all the foreign keys can also be used to uniquely identify a table, even in this
+scenario is also considered a composite key.
+
+Consider a scenario where there is a student table, mentor table, and another table named 
+mentor_mentee. A student can have multiple mentors, and a mentor can have multiple students.
+In this type of relationship, the mentor_mentee table stores pairings between a student and 
+their mentor. Records in the student table can be uniquely identified by student id, records 
+in mentor table can be identified by mentor id, but the table mentor_mentee needs both student
+id and mentor id to uniquely identify a record. 
+Both student id and mentor id are grouped as a primary key.
+
+CREATE TABLE employee(
+    employee_id INT PRIMARY KEY,
+    first_name VARCHAR(20),
+    last_name VARCHAR(20),
+    manager_id INT,
+    FOREIGN KEY(manager_id) REFERENCES employee(employee_id) ON DELETE SET NULL
+    );
+CREATE TABLE client(
+    client_id INT PRIMARY KEY,
+    client_name VARCHAR(20),
+    branch_id INT,
+    FOREIGN KEY(branch_id) REFERENCES branch(branch_id) ON DELETE SET NULL
+
+);
+CREATE TABLE branch (
+  branch_id INT PRIMARY KEY,
+  client_name VARCHAR(40),
+  manager_id INT,
+  FOREIGN KEY(manager_id) REFERENCES employee(employee_id) ON DELETE SET NULL
+);
+Step 2: Create a table works_with
+CREATE TABLE works_with (
+  employee_id INT,
+  client_id INT,
+  sales INT,
+  PRIMARY KEY(employee_id, client_id),
+  FOREIGN KEY(employee_id) REFERENCES Employee(employee_id) ON DELETE CASCADE,
+  FOREIGN KEY(client_id) REFERENCES Client(client_id) ON DELETE CASCADE
+);
+In the above table works_with, employee_id and client_id are combined to create a composite key.

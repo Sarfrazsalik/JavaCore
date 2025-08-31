@@ -1,0 +1,74 @@
+Spring provides stereotype annotations. These annotations are used to create Spring beans automatically in ApplicationContext.
+
+The following are the Spring stereotype annotations:
+
+1. @Component
+
+@Component is the main Stereotype Annotation. It is a class-level annotation. @Component is used across the application to mark the beans as Spring's managed components.
+
+2. @Service
+
+It is a specialization of @Component. The business logic of an application is in the service layer, @Service annotation is used to indicate that a class belongs to the service layer.
+
+3. @Repository
+
+It is a specialization of @Component. It is very similar to the DAO pattern. DAO classes provide CRUD operations for database tables.
+
+4. @Controller
+
+It is a specialization of @Component. The @Controller indicates that a particular class is a controller. It is mostly used with Spring MVC applications. It is used in combination with annotated methods based on the @RequestMapping annotation. The dispatcher scans the class and detects methods with @RequestMapping.
+
+
+
+Consider an application that is used to get and display the student data.
+An entity class Student is created with required fields.
+Service classes are created for services like getting students with percentages above 90 or students who are engineering majors etc.
+Repository classes are created to save the student and find the student by id etc.
+A controller class is created for registration and displaying data after registration.
+
+
+
+@Component
+Consider a class in the Spring application
+package com.sample.controller;
+
+@Component
+public class Student {
+    //fields
+    //methods
+}
+@Controller
+Consider a controller class StudentController
+package com.sample.controller;
+
+@Controller
+public class StudentController {
+
+    @RequestMapping(value = "" )
+    //method
+
+}
+@Service
+Consider a service class that converts marks to GPA.
+package com.sample.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class MarksToGpa {
+
+}
+@Repository
+Consider a DAO class StudentDAO.
+package com.sample.repository;
+
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class StudentDAO {
+
+    //methods to get data from the database and update the data in the database
+
+}
+
+

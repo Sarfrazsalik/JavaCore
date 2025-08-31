@@ -1,0 +1,148 @@
+Stream API
+The Java 8 Stream API is a functional-style way of defining operations on a stream of elements. Streams are an abstraction which allow defining operations which do not modify the source data and are lazily executed. Streams do not store data, they simply define operations like filtering, mapping, or reducing, and can be combined with other operations and then executed. Some built-in Streams are located in the java.util.stream package. The Stream API enables developers to perform complex data processing operations on collections in a functional and declarative manner.
+
+A stream is a sequence of elements that can be processed sequentially or in parallel. It represents a pipeline of data processing operations that can be applied to a collection. Streams are created from various data sources such as collections, arrays, or generator functions.
+
+Streams are divided into intermediate and terminal operations. Intermediate streams return a new stream and are always lazy - they don't actually execute until a terminal operation is called. Some common intermediate operations include map, filter, distinct, sorted, limit, and skip. Terminal operations trigger the execution of the stream pipeline, which allows efficiency by perfoming all operations in a single pass over the data. Examples of terminal operations include forEach, collect, reduce, count, min, max, anyMatch, allMatch, and noneMatch.
+
+Finally, reduction operations take a sequence of elements and combine them into a single result. Stream classes have the reduce() and collect() methods for this purpose, with many built-in operations defined in the Collectors class. Collectors are used to accumulate stream elements into a result container such as a List, Set, Map, or custom data structure. Common collectors include toList, toSet, toMap, joining, groupingBy, and partitioningBy.
+
+Example:
+
+List<Student> students = new ArrayList<>();
+// add students...
+List<Double> grades = students.stream()
+                          .filter(s -> s.isAttending())
+						  .mapToDouble(s -> s.getGrade)
+						  .collect(Collectors.toList());
+The Function Package
+The Stream API makes extensive use of functional interfaces such as Predicate, Function, Consumer, and Supplier. These interfaces enable developers to pass lambda expressions or method references as arguments to stream operations, making it easy to define custom behavior for processing stream elements.
+
+Java documentation: https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html
+
+
+The Java Stream API is an essential component of the Java programming language, providing developers with a powerful tool for processing collections of objects in a functional and declarative manner. Here are some key reasons highlighting the importance of the Java Stream API:
+
+Expressiveness and Readability: Streams enable developers to write code that is concise, expressive, and easy to understand. With features like lambda expressions and method chaining, complex data processing operations can be expressed in a clear and declarative style, leading to more maintainable code.
+Functional Programming Paradigm: Streams embrace functional programming concepts such as immutability, higher-order functions, and lazy evaluation. This paradigm shift allows developers to write code that is more modular, composable, and scalable, leading to better software design and architecture.
+Efficient and Parallel Processing: Streams provide built-in support for parallel execution, allowing developers to leverage multi-core processors and improve the performance of data processing tasks. By simply invoking the parallel() method on a stream, the Stream API can automatically parallelize operations across multiple threads, making it easy to take advantage of parallel processing without the need for low-level threading constructs.
+Rich Set of Operations: The Stream API offers a wide range of intermediate and terminal operations for filtering, mapping, sorting, aggregating, and reducing data. These operations, combined with collectors and collectors' factory methods, provide developers with a comprehensive toolkit for manipulating and transforming collections of objects.
+In summary, the Java Stream API plays a crucial role in modern Java development, offering developers a flexible, efficient, and expressive way to work with collections of objects. Its adoption has led to cleaner, more maintainable codebases and has empowered developers to tackle complex data processing tasks with ease.
+
+
+Below is an Associate class:
+
+public class Associate {
+
+  private int age;
+  private String firstName;
+  private String lastName;
+
+	// ... constructors and methods omitted
+}
+Let's say that in our main() method we creat a list of Associate objects:
+
+List<Associate> associateList = new ArrayList<>();
+    associateList.add(new Associate(1, "Juan", "Lopez"));
+    associateList.add(new Associate(2, "Ariel", "Gomez"));
+    associateList.add(new Associate(3, "Peter", "Alagna"));
+    associateList.add(new Associate(4, "Bobbert", "Lesley"));
+Below are several examples of working with streams:
+
+/** Iterate **/
+System.out.println("Iterating over all list: ");
+associateList.stream().forEach((Associate a) -> {
+	System.out.println(a.getFirstName());
+});
+/** Filter **/
+String filter = "r";
+System.out.println("\nIterating over list with filter(" + filter + ")");
+associateList.stream().filter((Associate a) -> new StringBuilder(a.getFirstName()).indexOf(filter) != -1)
+.forEach((Associate a) -> {
+	System.out.println(a.getFirstName());
+});
+/** Getting Max Age Value **/
+    int maxAge = associateList.stream().mapToInt(Associate::getAge).max().getAsInt();
+    System.out.println("\nThe highest age: " + maxAge);
+/** Getting Average Age Value **/
+    double avgAge = associateList.stream().mapToDouble(Associate::getAge).average().getAsDouble();
+    System.out.println("\nThe average age: " + avgAge);
+Exercises (Optional)
+In these exercises, there are two domain classes: Country and City. Each city belongs to a country defined by the attribute, countryCode. Each country has a unique code and has many cities.
+
+package com.example.domain;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Country {
+   private String code;
+   private String name;
+   private String continent;
+   private double surfaceArea;
+   private int population;
+   private double gnp;
+   private int capital;
+   private List<City> cities;
+   {
+      cities = new ArrayList<>();
+   }
+
+   public Country() {
+   }
+
+   public Country(String code, String name, String continent, int population,
+         double surfaceArea, double gnp, int capital) {
+      this.code = code;
+      this.name = name;
+      this.continent = continent;
+      this.surfaceArea = surfaceArea;
+      this.population = population;
+      this.capital = capital;
+      this.gnp = gnp;
+   }
+
+   // getters and setters
+
+   @Override   
+   public String toString() {
+      return "Country [ name=" + name + ", population=" + population + "]";
+   }
+
+}
+package com.example.domain;
+
+public class City {
+   private int id;
+   private String name;
+   private int population;
+   private String countryCode;
+
+   public City() {
+   }
+
+   public City(int id, String name, String countryCode, int population) {
+      this.id = id;
+      this.name = name;
+      this.population = population;
+      this.countryCode = countryCode;
+   }
+
+   // getters and setters
+   
+   @Override   
+   public String toString() {
+      return "City [id=" + id + ", name=" + name + ", population=" + population + ", countryCode=" + countryCode + "]";
+   };
+
+}
+
+EXERCISE 1:
+
+Write a Java program to find the highest populated city of each country.
+
+EXERCISE 2:
+
+Write a Java program to find the highest populated city of each continent.
+
+

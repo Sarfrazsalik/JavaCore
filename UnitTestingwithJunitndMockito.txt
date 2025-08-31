@@ -1,0 +1,248 @@
+Unit Testing in Spring Boot Applications with JUnit and Mockito
+Unit testing is an essential practice in software development that helps ensure the quality and correctness of your application's individual components. In the context of Spring Boot applications, unit testing focuses on isolating individual components or classes and verifying their behavior without depending on external dependencies like databases, web services, or other components in the system.
+
+JUnit and Mockito are widely used tools in the Java ecosystem to facilitate unit testing. JUnit is a powerful testing framework that simplifies the creation, execution, and maintenance of tests. Mockito is a powerful and flexible mocking framework that allows you to create mock objects for dependencies and control their behavior during testing.
+
+JUnit
+JUnit is an open-source testing framework that provides a set of annotations and assertions to write tests efficiently. It simplifies the process of creating, organizing, and executing tests, making it easier to ensure the correctness and reliability of your application code.
+
+Some of the key JUnit features are:
+
+Annotations to define test methods, test classes, setup, and tear-down procedures.
+Assertions to verify expected outcomes.
+Test runners to execute tests and report results.
+Mockito
+Mockito is a popular open-source mocking framework for Java applications. It allows you to create mock objects for external dependencies, control their behavior, and verify that they are being used correctly in the code under test. This is particularly important when testing components that interact with databases, web services, or other external systems.
+
+Some of the key Mockito features are:
+
+Creating mock objects for classes and interfaces.
+Stubbing methods to return specific values or throw exceptions.
+Verifying the number of times a method has been called, or if certain methods were called at all.
+Argument matchers to verify that methods are called with the correct parameters.
+Testing the Service Layer with Mocking
+To test the service layer in a Spring Boot application, developers can use JUnit to write unit tests for each service method. To isolate the service layer from the repository layer, they can use Mockito to mock the repository interface.
+
+Mocking the repository layer enables developers to create test scenarios where the service layer returns specific data or throws certain exceptions. Developers can use the @Mock annotation to create a mock object for the repository interface and then use the when method to stub the behavior of the mock object.
+
+Together, JUnit and Mockito provide a comprehensive set of tools for writing, organizing, and executing unit tests in Spring Boot applications. By leveraging these frameworks, developers can create a robust test suite that helps to ensure the stability and quality of their software.
+
+
+In this document, we will be discussing real-world applications and use cases of unit testing in Spring Boot applications using JUnit and Mockito. Unit testing plays a crucial role in ensuring the reliability and maintainability of software applications by validating individual components to make sure they work as intended. Let's explore how unit testing is used in various industries and scenarios.
+
+E-commerce Applications: E-commerce platforms require robust and efficient backend systems to manage customer data, product inventory, and order processing. Unit testing with JUnit and Mockito allows developers to verify the functionality of each component, such as services for user registration, login, adding products to the cart, and processing payments, ensuring the overall system's stability and reliability.
+
+Financial Services: Banking and financial applications require a high level of security and accuracy in processing transactions, managing accounts, and generating reports. Unit testing with Spring Boot, JUnit, and Mockito helps developers build and maintain complex financial tools while minimizing the risk of bugs and ensuring compliance with industry regulations.
+
+Internet of Things (IoT): IoT applications often involve a multitude of interconnected devices that require reliable and efficient software components. Spring Boot is a popular choice for building microservices that power IoT applications, and unit testing with JUnit and Mockito allows developers to validate these components' functionality individually, ensuring the overall system performs smoothly and securely.
+
+Health Care Systems: Healthcare applications handle sensitive data and require high availability, accuracy, and security. Unit testing in Spring Boot applications with JUnit and Mockito enables developers to rigorously test components responsible for patient information management, appointment scheduling, and billing, thereby improving the quality and reliability of healthcare software systems.
+
+Content Management Systems (CMS): CMS applications involve various components for managing user-generated content, such as text, images, and videos. Spring Boot is widely used for building scalable and modular CMS applications, and unit testing with JUnit and Mockito ensures that components such as content editors, media uploaders, and authentication systems work as intended, providing a stable and secure platform for content management.
+
+In conclusion, unit testing with JUnit and Mockito in Spring Boot applications is an essential practice that can significantly improve the reliability and maintainability of software systems in various real-world scenarios. By conducting thorough component-level tests, developers can catch potential issues early in the development process, leading to more stable and secure applications in various industries.
+
+
+
+In this guide, we will explore the implementation process of unit testing in Spring Boot applications using JUnit and Mockito. Here, we will learn how to write and run effective unit tests for our Spring Boot applications.
+
+Step 1: Add Dependencies
+To implement unit testing with JUnit and Mockito, we add the following dependencies to our pom.xml (Maven). We will also add Lombok to make the testing process faster:
+
+Maven
+<dependencies>
+    <!-- JUnit 5 and Spring Boot Test with Mockito -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-test</artifactId>
+        <scope>test</scope>
+    </dependency>
+    <!-- Lombok -->
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>1.18.26</version>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>RELEASE</version>
+        <scope>compile</scope>
+    </dependency>
+Step 2: Creating an Example Model Class:
+import lombok.Data;
+
+@Data
+public class Customer {
+    private Long id;
+    private String firstName;
+    private String lastName;
+}
+Step 3: Creating a CustomerRepository Interface to define the CRUD methods - typically we use Spring DataJPA:
+import java.util.List;
+
+@Repository
+public interface CustomerRepository {
+        Customer save(Customer customer);
+        Customer findById(Long id);
+        void delete(Customer customer);
+        List<Customer> findAll();
+}
+Step 4: Creating a CustomerService class that depends on the CustomerRepository
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+@AllArgsConstructor
+public class CustomerService {
+
+    private final CustomerRepository customerRepository;
+
+    public List<Customer> getAllCustomers() {
+        return customerRepository.findAll();
+    }
+
+    public Customer getCustomerById(Long id) {
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found with id " + id));
+    }
+
+    public Customer createCustomer(Customer customer) {
+        return customerRepository.save(customer);
+    }
+
+    public Customer updateCustomer(Long id, Customer customer) {
+        Customer existingCustomer = getCustomerById(id);
+        existingCustomer.setFirstName(customer.getFirstName());
+        existingCustomer.setLastName(customer.getLastName());
+        return customerRepository.save(existingCustomer);
+    }
+
+    public void deleteCustomer(Long id) {
+        Customer customerToDelete = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found with id " + id));
+        customerRepository.delete(customerToDelete);
+    }
+}
+Note that we don't need to add @Autowired annotation in this Service class because we are already using Lombok's @AllArgsConstructor which automatically injects the dependencies, including CustomerRepository, via constructor injection.
+
+Step 5: Creating a CustomerServiceTest class to test the CustomerService:
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.*;
+
+@ExtendWith(MockitoExtension.class)
+class CustomerServiceTest {
+
+}
+The @ExtendWith(MockitoExtension.class) annotation is used to register the JUnit 5 extension provided by Mockito, which allows you to use Mockito's mocking and verification capabilities in your JUnit 5 tests.
+
+The MockitoExtension class is a JUnit 5 extension that initializes and cleans up Mockito mocks in your test class. By using this extension, Mockito can automatically inject mock objects into your test class's fields annotated with @Mock, and create the instance of the test class with @InjectMocks.
+
+Step 6: Mocking the dependencies of the CustomerService class:
+@ExtendWith(MockitoExtension.class)
+public class CustomerServiceTest {
+
+    @Mock
+    private CustomerRepository customerRepository;
+
+    @InjectMocks
+    private CustomerService customerService;
+}
+In Mockito, @Mock is used to create a mock instance of a class or interface. This is useful when you want to test a specific class or method that depends on another class or interface, without actually having to instantiate that dependency.
+
+In the given code snippet, @Mock is used to create a mock instance of the CustomerRepository interface, which is a dependency of the CustomerService class.
+
+@InjectMocks is another annotation in Mockito which is used to inject the mocks that were created using the @Mock annotation into the target object (in this case, the CustomerService class).
+
+Together, @Mock and @InjectMocks allow us to isolate the class under test (CustomerService in this case) from its dependencies (CustomerRepository in this case), and control the behavior of those dependencies in our tests.
+
+Step 6: Completing CustomerServiceTest:
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class CustomerServiceTest {
+
+
+    @Mock
+    private CustomerRepository customerRepository;
+
+    @InjectMocks
+    private CustomerService customerService;
+
+    @Test
+    public void testCreateCustomer() {
+        // given
+        Customer customer = new Customer();
+        customer.setFirstName("John");
+        customer.setLastName("Doe");
+
+        when(customerRepository.save(customer)).thenReturn(customer);
+
+        // when
+        Customer savedCustomer = customerService.createCustomer(customer);
+
+        // then
+        assertEquals(customer, savedCustomer);
+        verify(customerRepository, times(1)).save(customer);
+    }
+
+    @Test
+    public void testGetCustomerById() {
+        // given
+        Long customerId = 1L;
+        Customer customer = new Customer();
+        customer.setId(customerId);
+        customer.setFirstName("John");
+        customer.setLastName("Doe");
+
+        when(customerRepository.findById(customerId)).thenReturn(Optional.of(customer));
+
+        // when
+        Customer foundCustomer = customerService.getCustomerById(customerId);
+
+        // then
+        assertEquals(customer, foundCustomer);
+        verify(customerRepository, times(1)).findById(customerId);
+    }
+
+    @Test
+    public void testDeleteCustomer() {
+        // given
+        Customer customer = new Customer();
+        customer.setId(1L);
+        customer.setFirstName("John");
+        customer.setLastName("Doe");
+
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+
+        // when
+        customerService.deleteCustomer(1L);
+
+        // then
+        verify(customerRepository, times(1)).findById(1L);
+        verify(customerRepository, times(1)).delete(customer);
+    }
+
+}
+Summary of the Above Test Suite:
+The test suite uses the JUnit 5 testing framework and the Mockito library to test the functionality of a CustomerService class. The @ExtendWith annotation is used to enable the MockitoExtension for the test suite. The @Mock annotation is used to mock the CustomerRepository dependency, and the @InjectMocks annotation is used to inject the mocked dependency into the CustomerService instance.
+
+There are three test methods in the test suite: testCreateCustomer(), testGetCustomerById(), and testDeleteCustomer(). The testCreateCustomer() method tests the createCustomer() method by creating a new Customer object and setting its properties, mocking the save() method of the CustomerRepository to return the created Customer, calling the createCustomer() method of the CustomerService, and then asserting that the returned Customer is the same as the created one and that the save() method was called exactly once.
+
+The testGetCustomerById() method tests the getCustomerById() method by creating a new Customer object, mocking the findById() method of the CustomerRepository to return an Optional containing the created Customer, calling the getCustomerById() method of the CustomerService with the created Customer's ID, and then asserting that the returned Customer is the same as the created one and that the findById() method was called exactly once with the correct ID.
+
+The testDeleteCustomer() method tests the deleteCustomer() method by creating a new Customer object and mocking the findById() method of the CustomerRepository to return an Optional containing the created Customer, calling the deleteCustomer() method of the CustomerService with the created Customer's ID, and then asserting that the findById() and delete() methods were called exactly once with the correct ID and customer object, respectively.
+
+
+

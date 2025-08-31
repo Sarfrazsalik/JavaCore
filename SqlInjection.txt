@@ -1,0 +1,160 @@
+SQL Injection is a common security vulnerability that occurs when untrusted user input is
+included directly in SQL queries without proper sanitization or parameterization. 
+When using JDBC (Java Database Connectivity) to interact with databases, it is crucial to be 
+aware of and mitigate the risk of SQL Injection.
+
+An SQL Injection attack allows malicious users to manipulate or execute unintended SQL queries, 
+potentially leading to unauthorized access, data leakage, or data corruption. 
+It is important to properly validate and sanitize user input before including it in SQL queries
+to prevent such attacks.
+
+
+Parameterized Queries
+
+Instead of concatenating user input directly into SQL queries, use parameterized queries with 
+placeholders for dynamic values. This ensures that user input is treated as data rather than
+executable code.
+
+Input Validation and Sanitization
+
+Validate and sanitize user input before using it in SQL queries. Apply appropriate input
+validation techniques, such as whitelisting, to ensure that only expected values are accepted.
+
+Stored Procedures
+Consider using stored procedures or prepared statements to encapsulate SQL logic. These 
+provide an extra layer of security by separating the code from user input.
+
+Least Privilege Principle
+Ensure that the database user account used by the application has the minimum required privileges.
+Restricting access rights helps limit the potential impact of a successful SQL Injection attack.
+
+Regular Updates and Security Patches
+Keep the JDBC driver and database software up to date to benefit from the latest security fixes 
+and improvements.
+
+
+Parameterized Queries
+This technique consists of using prepared statements with the question mark placeholder (“?”) in
+our queries whenever we need to insert a user-supplied value. 
+This is very effective and, unless there's a bug in the JDBC driver's implementation, 
+immune to exploits.
+
+Let's rewrite our example function to use this technique:
+
+public List<AccountDTO> safeFindAccountsByCustomerId(String customerId)
+  throws Exception {
+    
+    String sql = "select "
+      + "customer_id, acc_number, branch_id, balance from Accounts"
+      + "where customer_id = ?";
+    
+    Connection c = dataSource.getConnection();
+    PreparedStatement p = c.prepareStatement(sql);
+    p.setString(1, customerId);
+    ResultSet rs = p.executeQuery(sql)); 
+    // omitted - process rows and return an account list
+}
+Here we've used the prepareStatement() method available in the Connection instance to get a
+PreparedStatement. This interface extends the regular Statement interface with several methods
+that allow us to safely insert user-supplied values in a query before executing it.
+
+[DEBUG][SQL] select
+  account0_.id as id1_0_,
+  account0_.acc_number as acc_numb2_0_,
+  account0_.balance as balance3_0_,
+  account0_.branch_id as branch_i4_0_,
+  account0_.customer_id as customer5_0_ 
+from accounts account0_ 
+where account0_.customer_id=?
+As expected, the ORM layer creates a prepared statement using a placeholder for the customerId 
+parameter. This is the same we've done in the plain JDBC case – but with a few statements less, 
+which is nice.
+
+As a bonus, this approach usually results in a better performing query, since most databases can
+cache the query plan associated with a prepared statement.
+
+Please note that this approach only works for placeholders used as values. For instance, we 
+can't use placeholders to dynamically change the name of a table:
+
+// This WILL NOT WORK !!!
+PreparedStatement p = c.prepareStatement("select count(*) from ?");
+p.setString(1, tableName);
+The main reason behind this is the very nature of a prepared statement: database servers use
+them to cache the query plan required to pull the result set, which usually is the same for any 
+possible value. This is not true for table names and other constructs available in the SQL 
+language such as columns used in an order by clause.
+
+User Data Sanitization
+Data Sanitization is a technique of applying a filter to user supplied-data so it can be safely 
+used by other parts of our application. A filter's implementation may vary a lot, but we can 
+generally classify them in two types: whitelists and blacklists.
+
+Blacklists, which consist of filters that try to identify an invalid pattern, are usually of 
+little value in the context of SQL Injection prevention – but not for the detection! More on 
+this later.
+
+Whitelists, on the other hand, work particularly well when we can define exactly what is a valid 
+input.
+
+Let's enhance our safeFindAccountsByCustomerId method so now the caller can also specify the 
+column used to sort the result set. Since we know the set of possible columns, we can implement
+a whitelist using a simple set and use it to sanitize the received parameter:
+
+private static final Set<String> VALID_COLUMNS_FOR_ORDER_BY
+  = Collections.unmodifiableSet(Stream
+      .of("acc_number","branch_id","balance")
+      .collect(Collectors.toCollection(HashSet::new)));
+
+public List<AccountDTO> safeFindAccountsByCustomerId(
+  String customerId,
+  String orderBy) throws Exception { 
+    String sql = "select "
+      + "customer_id,acc_number,branch_id,balance from Accounts"
+      + "where customer_id = ? ";
+    if (VALID_COLUMNS_FOR_ORDER_BY.contains(orderBy)) {
+        sql = sql + " order by " + orderBy;
+    } else {
+        throw new IllegalArgumentException("Nice try!");
+    }
+    Connection c = dataSource.getConnection();
+    PreparedStatement p = c.prepareStatement(sql);
+    p.setString(1,customerId);
+    // ... result set processing omitted
+}
+Here, we're combining the prepared statement approach and a whitelist used to sanitize the 
+orderBy argument. The final result is a safe string with the final SQL statement. In this simple
+example, we're using a static set, but we could also have used database metadata functions to 
+create it.
+
+Are We Safe Now?
+Let's assume that we've used parameterized queries and/or whitelists everywhere. Can we now go
+to our manager and guarantee we're safe?
+
+Well… not so fast, there are other aspects we must consider:
+
+Stored Procedures: These are also prone to SQL Injection issues; whenever possible please apply 
+sanitation even to values that will be sent to the database via prepared statements
+
+Triggers: Same issue as with procedure calls, but even more insidious because sometimes we have
+no idea they're there.
+Insecure Direct Object References: Even if our application is SQL-Injection free, there's still 
+a risk that associated with this vulnerability category – the main point here is related to 
+different ways an attacker can trick the application, so it returns records he or she was not
+supposed to have access to – there's a good cheat sheet on this topic available at OWASP's 
+GitHub repository
+In short, our best option here is caution. Many organizations nowadays use a “red team” exactly 
+for this. Let them do their job, which is exactly to find any remaining vulnerabilities.
+
+Damage Control Techniques
+As a good security practice, we should always implement multiple defense layers – a concept
+ known as defense in depth. The main idea is that even if we're unable to find all possible 
+vulnerabilities in our code – a common scenario when dealing with legacy systems – we should at
+least try to limit the damage an attack would inflict.
+
+Of course, this would be a topic for a whole article or even a book but let's name a few measures:
+
+Apply the principle of least privilege: Restrict as much as possible the privileges of the account used to access the database
+Use database-specific methods available in order to add an additional protection layer; for example, the H2 Database has a session-level option that disables all literal values on SQL Queries
+Use short-lived credentials: Make the application rotate database credentials often
+Log everything: If the application stores customer data, this is a must; there are many solutions available that integrate directly to the database or work as a proxy, so in case of an attack we can at least assess the damage
+Use WAFs (Web Application Firewalls) or similar intrusion detection solutions: those are the typical blacklist examples – usually, they come with a sizeable database of known attack signatures and will trigger a programmable action upon detection. Some also include in-JVM agents that can detect intrusions by applying some instrumentation – the main advantage of this approach is that an eventual vulnerability becomes much easier to fix since we'll have a full stack trace available.
